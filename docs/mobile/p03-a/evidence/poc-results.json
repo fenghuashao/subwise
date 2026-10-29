@@ -1,0 +1,107 @@
+{
+  "task": "Subwise P03-A",
+  "generatedAt": "2026-10-29T12:55:16.393Z",
+  "runtime": "v24.21.0",
+  "fixtureSource": "https://api-docs.deepseek.com/api/get-user-balance/",
+  "checks": [
+    {
+      "name": "official example retains decimal strings",
+      "status": "PASS"
+    },
+    {
+      "name": "two currencies remain independent including zero",
+      "status": "PASS"
+    },
+    {
+      "name": "unavailable is not invalid authentication",
+      "status": "PASS"
+    },
+    {
+      "name": "optional missing components stay unknown",
+      "status": "PASS"
+    },
+    {
+      "name": "missing wallet rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "empty wallets rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "missing availability rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "invalid decimal rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "unknown currency rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "missing amount rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "duplicate currency rejected",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback HTTP contract success",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /401",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /403",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /429",
+      "status": "PASS"
+    },
+    {
+      "name": "Retry-After retained",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /500",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /malformed",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /redirect",
+      "status": "PASS"
+    },
+    {
+      "name": "loopback /timeout",
+      "status": "PASS"
+    }
+  ],
+  "loopbackRequests": 8,
+  "publicProbe": {
+    "status": "OBSERVED",
+    "authenticated": false,
+    "httpStatus": 401,
+    "contentType": null
+  },
+  "authenticatedLiveBalance": "NOT_RUN",
+  "mobileBuilds": {
+    "ios": "NOT_RUN",
+    "android": "NOT_RUN",
+    "harmonyos": "NOT_RUN"
+  },
+  "limitations": [
+    "Fixtures and loopback prove contract handling only.",
+    "No real credentials read or used.",
+    "No model inference invoked.",
+    "No account balance, mobile network or device credential store verified."
+  ]
+}

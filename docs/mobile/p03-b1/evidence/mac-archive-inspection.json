@@ -1,0 +1,19 @@
+{
+  "safe": true,
+  "entries": [
+    "mobile/p03-b/",
+    "mobile/p03-b/rn/app.json",
+    "mobile/p03-b/rn/index.js",
+    "mobile/p03-b/rn/metro.config.js",
+    "mobile/p03-b/rn/package-lock.json",
+    "mobile/p03-b/rn/package.json",
+    "mobile/p03-b/rn/tsconfig.json",
+    "mobile/p03-b/rn/src/App.tsx",
+    "mobile/p03-b/rn/src/core.mjs",
+    "mobile/p03-b/rn/tests/core.test.mjs",
+    "mobile/p03-b1/mac-verify.mjs",
+    "docs/mobile/",
+    "docs/mobile/p03-b1/MAC-TASK.md"
+  ],
+  "count": 13
+}

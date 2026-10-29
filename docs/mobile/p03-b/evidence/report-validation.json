@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "at": "2026-10-29T13:28:34.461Z",
+  "preservedFiles": 19,
+  "manifestFiles": 59,
+  "offlineResources": true,
+  "embeddedScreenshot": true,
+  "fixtureParity": true,
+  "nativeGate": "NOT_PASSED",
+  "scope": "Report/source checks only; not native acceptance"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "web-bundle",
+  "command": "npx expo export --platform web --output-dir dist-web",
+  "startedAt": "2026-10-29T13:21:20.736Z",
+  "finishedAt": "2026-10-29T13:21:29.016Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "status": "PASS",
+  "log": "web-bundle.log"
+}

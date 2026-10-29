@@ -1,0 +1,11 @@
+{
+  "name": "native-js-bundle",
+  "command": "npx expo export --platform android --platform ios --output-dir dist-native",
+  "startedAt": "2026-10-29T13:21:08.915Z",
+  "finishedAt": "2026-10-29T13:21:20.731Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "status": "PASS",
+  "log": "native-js-bundle.log"
+}

@@ -1,0 +1,51 @@
+{
+  "task": "P03-A",
+  "generatedAt": "2026-10-29T13:01:39.739Z",
+  "checks": [
+    {
+      "name": "document UTF-8 and Chinese language",
+      "status": "PASS"
+    },
+    {
+      "name": "no external runtime resources",
+      "status": "PASS"
+    },
+    {
+      "name": "all seven platforms included",
+      "status": "PASS"
+    },
+    {
+      "name": "evidence labels preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "source revision pinned",
+      "status": "PASS"
+    },
+    {
+      "name": "no unresolved renderer placeholders",
+      "status": "PASS"
+    },
+    {
+      "name": "all internal navigation targets exist exactly once",
+      "status": "PASS"
+    },
+    {
+      "name": "tables have consistent column counts",
+      "status": "PASS"
+    },
+    {
+      "name": "HTML structural containers balanced",
+      "status": "PASS"
+    },
+    {
+      "name": "all baseline files preserved",
+      "status": "PASS"
+    }
+  ],
+  "browserVisual": "NOT_RUN",
+  "browserReason": "Browser URL security policy rejected file://; no workaround attempted.",
+  "realAccountQueries": "NOT_RUN",
+  "mobileBuilds": "NOT_RUN",
+  "commitPush": "NOT_RUN"
+}

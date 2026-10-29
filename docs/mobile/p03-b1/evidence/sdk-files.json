@@ -1,0 +1,18 @@
+[
+  {
+    "path": "platforms/android-36/android.jar",
+    "exists": false
+  },
+  {
+    "path": "build-tools/36.0.0/aapt2.exe",
+    "exists": false
+  },
+  {
+    "path": "ndk/27.1.12297006/build/cmake/android.toolchain.cmake",
+    "exists": false
+  },
+  {
+    "path": "cmake/3.22.1/bin/cmake.exe",
+    "exists": false
+  }
+]

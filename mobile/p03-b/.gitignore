@@ -1,0 +1,12 @@
+**/node_modules/
+**/.expo/
+**/dist-native/
+**/dist-web/
+**/android/
+**/ios/
+**/.gradle/
+**/build/
+**/local.properties
+**/.hvigor/
+**/oh_modules/
+**/*.db*

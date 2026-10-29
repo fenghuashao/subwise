@@ -1,0 +1,12 @@
+{
+  "device": "emulator-5580",
+  "avd": "Subwise_P03B1",
+  "bootCompleted": "1",
+  "android": "14",
+  "api": "34",
+  "osBoot": "PASS",
+  "subwiseInstalled": false,
+  "subwiseRuntime": "NOT_RUN",
+  "physicalDevice": "NOT_RUN",
+  "screenshot": "emulator-boot.png"
+}

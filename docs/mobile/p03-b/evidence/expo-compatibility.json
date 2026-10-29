@@ -1,0 +1,11 @@
+{
+  "name": "expo-compatibility",
+  "command": "npx expo install --check",
+  "startedAt": "2026-10-29T13:21:04.002Z",
+  "finishedAt": "2026-10-29T13:21:08.331Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "status": "PASS",
+  "log": "expo-compatibility.log"
+}

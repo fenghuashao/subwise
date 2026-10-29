@@ -1,0 +1,11 @@
+{
+  "name": "android-prebuild",
+  "command": "npx expo prebuild --platform android --no-install",
+  "startedAt": "2026-10-29T13:17:51.468Z",
+  "finishedAt": "2026-10-29T13:17:55.931Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "status": "PASS",
+  "log": "android-prebuild.log"
+}

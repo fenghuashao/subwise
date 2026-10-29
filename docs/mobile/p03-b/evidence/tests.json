@@ -1,0 +1,11 @@
+{
+  "name": "tests",
+  "command": "npm test",
+  "startedAt": "2026-10-29T13:21:01.148Z",
+  "finishedAt": "2026-10-29T13:21:02.290Z",
+  "exitCode": 0,
+  "signal": null,
+  "error": null,
+  "status": "PASS",
+  "log": "tests.log"
+}

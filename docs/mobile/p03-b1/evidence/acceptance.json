@@ -1,0 +1,64 @@
+{
+  "phase": "P03-B1",
+  "date": "2026-10-29",
+  "timezone": "Asia/Shanghai",
+  "overall": "BLOCKED",
+  "android": {
+    "gradleBootstrap": "PASS",
+    "emulatorOsBoot": "PASS",
+    "build": "FAIL",
+    "buildGate": "BLOCKED",
+    "apk": "NOT_PRODUCED",
+    "appLaunch": "NOT_RUN",
+    "sqlite": "NOT_RUN",
+    "secureStore": "NOT_RUN",
+    "https": "NOT_RUN",
+    "notifications": "NOT_RUN",
+    "appRestartPersistence": "NOT_RUN",
+    "physicalDevice": "NOT_RUN"
+  },
+  "ios": {
+    "access": "BLOCKED",
+    "reason": "FA confirmed Mac mini M4 unavailable this turn",
+    "handoff": "PASS",
+    "build": "NOT_RUN",
+    "runtime": "NOT_RUN"
+  },
+  "harmony": {
+    "toolchain": "BLOCKED",
+    "build": "NOT_RUN",
+    "runtime": "NOT_RUN"
+  },
+  "frameworkDecision": "Retain RN/Expo candidate; native evidence insufficient to approve formal development or P03-C",
+  "nextPhaseStarted": false,
+  "committedOrPushed": false,
+  "baselinePreserved": 78,
+  "builds": [
+    {
+      "attempt": 1,
+      "exitCode": 1,
+      "status": "FAIL",
+      "log": "android-build-1.log"
+    },
+    {
+      "attempt": 2,
+      "exitCode": 1,
+      "status": "FAIL",
+      "log": "android-build-2.log"
+    },
+    {
+      "attempt": 3,
+      "exitCode": 1,
+      "status": "FAIL",
+      "log": "android-build-3.log"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "artifacts/subwise-p03-b1-mac-handoff.zip",
+      "kind": "Mac source handoff; NOT IPA or .app",
+      "sha256": "19DC3F637DD370917B05014F692E8E930494660D11EC37E5F2A4D66F3D85022E",
+      "bytes": 82952
+    }
+  ]
+}

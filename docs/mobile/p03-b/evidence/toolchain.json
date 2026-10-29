@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-29",
+  "host": "Windows",
+  "tools": [
+    {
+      "tool": "node",
+      "path": "C:\\Users\\fengh\\AppData\\Local\\Programs\\nodejs\\node.exe"
+    },
+    {
+      "tool": "npm",
+      "path": "C:\\Users\\fengh\\AppData\\Local\\Programs\\nodejs\\npm.ps1"
+    },
+    {
+      "tool": "java",
+      "path": "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath\\java.exe"
+    },
+    {
+      "tool": "adb",
+      "path": null
+    },
+    {
+      "tool": "flutter",
+      "path": null
+    },
+    {
+      "tool": "hdc",
+      "path": null
+    },
+    {
+      "tool": "hvigor",
+      "path": null
+    },
+    {
+      "tool": "xcodebuild",
+      "path": null
+    }
+  ],
+  "androidSdk": "C:/Users/fengh/AppData/Local/Android/Sdk",
+  "androidPlatforms": [
+    "android-30",
+    "android-33"
+  ],
+  "buildTools": [
+    "30.0.2",
+    "33.0.0",
+    "34.0.0",
+    "35.0.0"
+  ],
+  "attachedDevices": [],
+  "avds": [
+    "Pixel_3a_API_34_extension_level_7_x86_64",
+    "Pixel_6_Pro_API_33"
+  ],
+  "note": "Limited PATH and standard-location probes; not an exhaustive whole-disk search. No credential/config file inspection."
+}

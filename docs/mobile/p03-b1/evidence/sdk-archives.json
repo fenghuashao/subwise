@@ -1,0 +1,38 @@
+[
+  {
+    "path": "platforms;android-36",
+    "url": "platform-36-ext19_r01.zip",
+    "sha1": "52e240c229cf2ad561ee262ebdfff266e180c585",
+    "license": "android-sdk-license"
+  },
+  {
+    "path": "platforms;android-36",
+    "url": "platform-36-ext18_r01.zip",
+    "sha1": "33a7af9f531f6ce67b3ec357f619e69aa0a95c8a",
+    "license": "android-sdk-license"
+  },
+  {
+    "path": "platforms;android-36",
+    "url": "platform-36_r02.zip",
+    "sha1": "2c1a80dd4d9f7d0e6dd336ec603d9b5c55a6f576",
+    "license": "android-sdk-license"
+  },
+  {
+    "path": "ndk;27.1.12297006",
+    "url": "android-ndk-r27b-windows.zip",
+    "sha1": "3bb7efc850cd0af7707854b7e0d5c3b6a7153703",
+    "license": "android-sdk-license"
+  },
+  {
+    "path": "build-tools;36.0.0",
+    "url": "build-tools_r36_windows.zip",
+    "sha1": "f16ccffd34de8790dede813a6c7d8e2c11a27b50",
+    "license": "android-sdk-license"
+  },
+  {
+    "path": "cmake;3.22.1",
+    "url": "cmake-3.22.1-windows.zip",
+    "sha1": "292778f32a7d5183e1c49c7897b870653f2d2c1b",
+    "license": "android-sdk-license"
+  }
+]

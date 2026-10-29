@@ -1,0 +1,8 @@
+{
+  "scope": "Windows Node HTTPS; no Authorization; NOT mobile",
+  "startedAt": "2026-10-29T13:17:56.722Z",
+  "status": 401,
+  "expected": 401,
+  "authenticated": false,
+  "statusLabel": "PASS"
+}

@@ -1,0 +1,27 @@
+{
+  "harmonyJsonStaticParse": {
+    "status": "PASS",
+    "files": [
+      "mobile\\p03-b\\harmony\\AppScope\\app.json5",
+      "mobile\\p03-b\\harmony\\AppScope\\resources\\base\\element\\string.json",
+      "mobile\\p03-b\\harmony\\build-profile.json5",
+      "mobile\\p03-b\\harmony\\entry\\build-profile.json5",
+      "mobile\\p03-b\\harmony\\entry\\oh-package.json5",
+      "mobile\\p03-b\\harmony\\entry\\src\\main\\module.json5",
+      "mobile\\p03-b\\harmony\\entry\\src\\main\\resources\\base\\element\\color.json",
+      "mobile\\p03-b\\harmony\\entry\\src\\main\\resources\\base\\profile\\main_pages.json",
+      "mobile\\p03-b\\harmony\\entry\\src\\main\\resources\\rawfile\\fixtures.json",
+      "mobile\\p03-b\\harmony\\hvigor\\hvigor-config.json5",
+      "mobile\\p03-b\\harmony\\oh-package.json5"
+    ],
+    "notProofOf": "ArkTS compilation"
+  },
+  "android": "[versions]\n# Android versions\nminSdk = \"24\"\ntargetSdk = \"36\"\ncompileSdk = \"36\"\nbuildTools = \"36.0.0\"\nndkVersion = \"27.1.12297006\"\n",
+  "iosMinimumSource": "react-native/scripts/cocoapods/helpers.rb:84 and expo/Expo.podspec:39 => 15.1",
+  "java": {
+    "pathJava": "17.0.9",
+    "initialJavaHome": "JDK 8",
+    "retry": "process-only JDK 17; Connection refused"
+  },
+  "gradleWrapper": "9.0.0"
+}

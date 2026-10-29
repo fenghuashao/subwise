@@ -1,0 +1,38 @@
+{
+  "deepseek": {
+    "is_available": true,
+    "balance_infos": [
+      {
+        "currency": "CNY",
+        "total_balance": "110.00",
+        "granted_balance": "10.00",
+        "topped_up_balance": "100.00"
+      },
+      {
+        "currency": "USD",
+        "total_balance": "0.00"
+      }
+    ]
+  },
+  "minimax": {
+    "contract": "subwise.synthetic.windows.v1",
+    "windows": [
+      {
+        "pool": "coding",
+        "window": "5h-demo",
+        "label": "模拟 5 小时窗口",
+        "limit": 100,
+        "remaining": 62,
+        "resetAt": "2026-10-29T16:00:00Z"
+      },
+      {
+        "pool": "coding",
+        "window": "week-demo",
+        "label": "模拟周窗口（非套餐承诺）",
+        "limit": 1000,
+        "remaining": null,
+        "resetAt": null
+      }
+    ]
+  }
+}

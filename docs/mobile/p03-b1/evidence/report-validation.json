@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "scope": "Report/evidence/handoff structural checks only; not native app acceptance",
+  "at": "2026-10-29T14:01:55.903Z",
+  "preservedFiles": 78,
+  "offlineReport": true,
+  "artifactHashVerified": true,
+  "overallNativeGate": "BLOCKED"
+}

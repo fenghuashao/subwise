@@ -1,0 +1,297 @@
+[
+  {
+    "path": "mobile/p03-b/.gitignore",
+    "sha256": "08EB838000D4007E3C098BC15379C86B8C69064921CB1F2748B9D4EB10AD32A1",
+    "bytes": 154
+  },
+  {
+    "path": "mobile/p03-b/harmony/AppScope/app.json5",
+    "sha256": "57B4621A0CD5AEC6A7A5BA24B36D892EB7C8B61124E61408F9A1C3FBF4CA28DF",
+    "bytes": 151
+  },
+  {
+    "path": "mobile/p03-b/harmony/AppScope/resources/base/element/string.json",
+    "sha256": "5CD2C7B38630279E9133AD00B8C42D8B8C661C73C834C181851AD00DC0275DB3",
+    "bytes": 57
+  },
+  {
+    "path": "mobile/p03-b/harmony/AppScope/resources/base/media/app_icon.svg",
+    "sha256": "8EAC9A6EDA349E0445CEFF023226431CF08F9C7A71AFC64242F2809DFEED706D",
+    "bytes": 205
+  },
+  {
+    "path": "mobile/p03-b/harmony/build-profile.json5",
+    "sha256": "E863DA8F325D48E009000B3CBEEECB8430AEA8A35CAB2DCF436DA103FC099CE6",
+    "bytes": 320
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/build-profile.json5",
+    "sha256": "73135BFDC44791D813982E494DBDD4E4E1A82651B51738E34A54EEC38F88017E",
+    "bytes": 72
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/hvigorfile.ts",
+    "sha256": "F547983DCAB9C8FFF87CC3DDEDB22BB98063663C5B8AFE18BB32E131311EC289",
+    "bytes": 103
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/oh-package.json5",
+    "sha256": "7CD387DD31957B5D1AA77C5A6E13C7705EF09D93A9299E42ABC45A5FAD6D9B67",
+    "bytes": 82
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/ets/entryability/EntryAbility.ets",
+    "sha256": "416248D2DDD8C4B173C086A5D64137359091EF91D83C9D5EC7726CCA3694A9D9",
+    "bytes": 231
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/ets/pages/Index.ets",
+    "sha256": "67225B029262063D5F5CE385A7F94A39A1C804173FEC20D3618489D43ADEBD24",
+    "bytes": 2877
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/ets/Probe.ets",
+    "sha256": "F45191A465D5BF26D3089165BB6F14FE316A2EEEE8687CE4F66BC0C4661B558C",
+    "bytes": 5629
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/module.json5",
+    "sha256": "1ACFE86BED854AEF2F521E693EA94D445E543E3B86A9AF50575702ECE4530832",
+    "bytes": 683
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/resources/base/element/color.json",
+    "sha256": "C8474FB84E9FE51D8805DA8A3F5D0424F2E790C6740BA29B869DCBB77AF94933",
+    "bytes": 65
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/resources/base/profile/main_pages.json",
+    "sha256": "621D1C271CF89755A64364B8E70C65745D9049EBAF18EFA3EBA95A2AE0B4558D",
+    "bytes": 24
+  },
+  {
+    "path": "mobile/p03-b/harmony/entry/src/main/resources/rawfile/fixtures.json",
+    "sha256": "0C79C215720B31C5E9A55EB27B495EFDEA5CBE27EA823C5F631D4081E68858C7",
+    "bytes": 804
+  },
+  {
+    "path": "mobile/p03-b/harmony/hvigor/hvigor-config.json5",
+    "sha256": "F34FC46AB9CCB8E3B331878438BBA590D188A774BD8C377C8D514C6EE42049BC",
+    "bytes": 43
+  },
+  {
+    "path": "mobile/p03-b/harmony/hvigorfile.ts",
+    "sha256": "2378C5E0C5246005ADA73A67E8C9834FA08ADB9FFD6FB6C219051456753BED5A",
+    "bytes": 103
+  },
+  {
+    "path": "mobile/p03-b/harmony/oh-package.json5",
+    "sha256": "FE7E51E91942FC770A5314CF403B3FB702F29143613DE15EB047A9629D699EED",
+    "bytes": 110
+  },
+  {
+    "path": "mobile/p03-b/harmony/README.md",
+    "sha256": "09F79B496A4D6C1F4D98C23C758E3E892C8CE9E4CE51332EC227DF7D55616BF5",
+    "bytes": 1187
+  },
+  {
+    "path": "mobile/p03-b/rn/app.json",
+    "sha256": "178D487644F1156E8C5182891F1CC1B5C258710028B04D5FCCB0F1F005AC0A34",
+    "bytes": 411
+  },
+  {
+    "path": "mobile/p03-b/rn/index.js",
+    "sha256": "D93097AC7890EF596C5CB3971A3C531874A53EB8AB90288765B9032430CE941F",
+    "bytes": 103
+  },
+  {
+    "path": "mobile/p03-b/rn/metro.config.js",
+    "sha256": "47BBC6BB3C18D1DE84EF3C17535293817BE76BC2B1A00F28F6A1D2D739CCF0B3",
+    "bytes": 168
+  },
+  {
+    "path": "mobile/p03-b/rn/package-lock.json",
+    "sha256": "B8E7E8046F0FF7AEB31D62BEAE2340D2DCD69978FEC797FA96133A174E382D14",
+    "bytes": 295310
+  },
+  {
+    "path": "mobile/p03-b/rn/package.json",
+    "sha256": "4A3A6AFF1049B879D32D4AB5FAF889D4FE77E0A79FB48311741C4251E29CFD16",
+    "bytes": 693
+  },
+  {
+    "path": "mobile/p03-b/rn/src/App.tsx",
+    "sha256": "EF293A36784726C3C479322A86CF169FE04A1D7EA325C2735A0DFCC95A5BF336",
+    "bytes": 7372
+  },
+  {
+    "path": "mobile/p03-b/rn/src/core.mjs",
+    "sha256": "E5DCF9D214960F33FAFD149397C0ABE7413E1910E3D4E950CD705A20CDEFB07F",
+    "bytes": 5831
+  },
+  {
+    "path": "mobile/p03-b/rn/tests/core.test.mjs",
+    "sha256": "43448DF9AA719432062F4BB7C443CA17676C48E4998DB7FF1A2865EAD99AB96A",
+    "bytes": 5531
+  },
+  {
+    "path": "mobile/p03-b/rn/tsconfig.json",
+    "sha256": "BED2ABD3A7232BAD75CC48E37B9804865F28B1B6B4C6EDF0B7812087A17EECBA",
+    "bytes": 139
+  },
+  {
+    "path": "docs/mobile/p03-b/build-report.mjs",
+    "sha256": "0679775B4A80EF0E13C198CE805BC86B014CC5BC7E40A80DC3E1E4B92784A363",
+    "bytes": 17688
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/acceptance.json",
+    "sha256": "3EBEBAC5B6DC0EEE9CB3CC1B2E06427069271BF1A9B8CE94A139537E5524C38E",
+    "bytes": 556
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/android-assemble-initial.log",
+    "sha256": "C1D2B560EA0A1CA59634BFF256EFCA629E46EF3ED986505C9D9FDAFFDF2E8BB2",
+    "bytes": 2165
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/android-assemble.json",
+    "sha256": "592E2CD7CA92397F036BD321A596775D1FC2A53566D696B900441F5828DEE3CE",
+    "bytes": 314
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/android-assemble.log",
+    "sha256": "D33163D1418770334669B32272F0FD8020D5F63AC471D336DC50DB5165DF3A0C",
+    "bytes": 2162
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/android-prebuild.json",
+    "sha256": "AA29FA2A75E929BD4F3C8CBED9B0CBD29EDC43AAA290047688384EABCF4C052D",
+    "bytes": 290
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/android-prebuild.log",
+    "sha256": "D5E4BE0A0C10691BFFA446716505E068D943D1FCA32F0D93D5AF6F817E29C4E4",
+    "bytes": 172
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/baseline.json",
+    "sha256": "AA45B26FAC5FCAFC0DA253DC1E11AC34D11BB02919A0237007A55418260B3E92",
+    "bytes": 2662
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/browser-observations.json",
+    "sha256": "88F4635224CE92379843A17A27C62DE6E1215923058FD95E45D19EB8B71288A8",
+    "bytes": 12470
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/dependencies.json",
+    "sha256": "B8E490F0573CEE296F251C3DB0742C99E1AB5F155F0CC6AEDF4EFEBCBC5B23F2",
+    "bytes": 256
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/dependencies.log",
+    "sha256": "9A8712FD299F1FCF0AB3F7DACF2D30E3BCBF103DCD45B33FD8BBAB63D29BD8F8",
+    "bytes": 1986
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/expo-compatibility.json",
+    "sha256": "016E1050CD2249E30A3340DADB672DAACF115745A4AD63753FCB60ED0122C6DA",
+    "bytes": 269
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/expo-compatibility.log",
+    "sha256": "8152E1DFE2839254529BD71A5C9D6F299C93BC1132025C5930DCC5DC042489DB",
+    "bytes": 28
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/https-host.json",
+    "sha256": "23ADDBB986260E4DF97CDEEE77E5BB85A4BD8CC7AA2CA48C2CFC2FCA07E56324",
+    "bytes": 195
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/native-config-inspection.json",
+    "sha256": "00A9DCD0CC71ACFFEA3576661AB90D6A3E40169275E2ADED5E7738F8033577A7",
+    "bytes": 1288
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/native-js-bundle.json",
+    "sha256": "03E5E95253C77E80D27A3B2425DBCD77CC2CB8EE379F88A80D6E5BF4FDE57F7C",
+    "bytes": 315
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/native-js-bundle.log",
+    "sha256": "39861682E1A9D3F58E3BA490C7658CB3056CA2760C940968A97DA77B4C1FCD07",
+    "bytes": 770
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/preservation.json",
+    "sha256": "002C0498A786CFEAB1F01B789630BA74F6F44B8BC835D0A534CB1191E67D8BE7",
+    "bytes": 4711
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/tests.json",
+    "sha256": "0E4B5FB101D5B02BC898EA7F7F40A6B052398A8FE96C2ABD7F9C3C60F7B8BFE5",
+    "bytes": 227
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/tests.log",
+    "sha256": "C6D8A56424431EA0492235F41D98501545BEE1DDFD0BCB19D5B9819EEDEDA155",
+    "bytes": 813
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/toolchain.json",
+    "sha256": "52539D37B53D7EF579DE4B25641F32394BE89635D1CEB58CA5AAF9728B370667",
+    "bytes": 1186
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/typecheck.json",
+    "sha256": "21B7DD05C4EB8AE8A5B3B17BC8BBDD95BCF99D5F8B920ECA2035E2E2E9042636",
+    "bytes": 240
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/typecheck.log",
+    "sha256": "EA504A3A58D6EE86E647DD44007460106671D47D00ECEFA161F6589AE886E51D",
+    "bytes": 50
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/web-bundle.json",
+    "sha256": "815AE364C00DD832BF8053941A5E7541C8C76A49F8EE845758607BC1F06CF413",
+    "bytes": 281
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/web-bundle.log",
+    "sha256": "00B6FC5D82C2CB9E72BD64F5E4B2F1336C95743CD5B7F5E08BDF5F3CE6182580",
+    "bytes": 658
+  },
+  {
+    "path": "docs/mobile/p03-b/evidence/web-probe.png",
+    "sha256": "E57539ABCA6540F7E92DF1FFFCF766E5D6863223EBFD32D522E75E1BE3BB520A",
+    "bytes": 64730
+  },
+  {
+    "path": "docs/mobile/p03-b/README.md",
+    "sha256": "DE1859FABAD8B2558C7176E0DED08E4B3AB1A8F6DB3080C0345FC8AA69A5EF18",
+    "bytes": 5575
+  },
+  {
+    "path": "docs/mobile/p03-b/run-checks.mjs",
+    "sha256": "3C9A43481DBD3200D6DD9BDB594B732A5AA28542836C6B166FE0F9B827576F2D",
+    "bytes": 1867
+  },
+  {
+    "path": "docs/mobile/p03-b/serve-web.mjs",
+    "sha256": "BE383474D61F9CBB5B156DD1320A4965A0D6F0D50332004FE3722673A237ECB9",
+    "bytes": 1230
+  },
+  {
+    "path": "docs/mobile/p03-b/SUBWISE-P03-B-REPORT.html",
+    "sha256": "037A8896B8A0E763AA6703A32493C75230E574FAEC776B5051F28532AAD0FD80",
+    "bytes": 140062
+  },
+  {
+    "path": "docs/mobile/p03-b/verify-report.mjs",
+    "sha256": "08868081215D63EB2D3566666ACD2AFD8EE25081AE2C72DD3D6469D69477BC94",
+    "bytes": 2413
+  }
+]

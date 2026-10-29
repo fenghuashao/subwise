@@ -1,0 +1,11 @@
+{
+  "name": "android-assemble",
+  "command": "android\\gradlew.bat -p android assembleDebug --no-daemon --console plain",
+  "startedAt": "2026-10-29T13:20:31.833Z",
+  "finishedAt": "2026-10-29T13:20:32.515Z",
+  "exitCode": 1,
+  "signal": null,
+  "error": null,
+  "status": "FAIL",
+  "log": "android-assemble.log"
+}

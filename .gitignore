@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Local toolchain & agent workspace (SDK, gradle, AVD, memory)
+.local/
+.workbuddy/
+
+# Build artifacts
+mobile/p03-b/rn/dist-native/
+mobile/p03-b/rn/dist-web/
+.gradle/
+**/build/outputs/
+
+# Raw process logs & exit markers (keep structured *.json evidence)
+*.log
+*.exit
+
+# Handoff archives
+docs/mobile/p03-b1/artifacts/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets — keys belong in env vars only
+.env
+.env.*

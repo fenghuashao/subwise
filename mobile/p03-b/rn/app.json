@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Subwise P03-B · 模拟验证", "slug": "subwise-p03b", "version": "0.0.1",
+    "platforms": ["ios", "android", "web"],
+    "ios": {"bundleIdentifier": "dev.subwise.p03b", "supportsTablet": false},
+    "android": {"package": "dev.subwise.p03b", "allowBackup": false},
+    "plugins": ["expo-sqlite", ["expo-secure-store", {"configureAndroidBackup": true}], "expo-notifications"]
+  }
+}
