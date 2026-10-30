@@ -158,8 +158,20 @@ jobs:
           WS=$(ls -d *.xcworkspace | head -1)
           echo "workspace: $WS"
           xcodebuild -list -json -workspace "$WS" > schemes.json
-          # scheme 必须匹配 App target（工作区里还包含 Pods 的 EXApplication 等 scheme）
-          SCHEME=$(python3 -c "import json;d=json.load(open('schemes.json'));s=[x for x in d['workspace']['schemes'] if not x.startswith('Pods-') and x!='EXApplication'];print(s[0] if s else '')")
+          # App scheme = 与工作区同名的 scheme（SubwiseP03B）。
+          # 工作区里还有 CocoaPods 生成的 EXApplication / EXApplication-* 等聚合 scheme，
+          # 选中它们会只构建 Pods 目标，不产出 App。
+          SCHEME=$(python3 -c "
+          import json,os
+          d=json.load(open('schemes.json'))
+          schemes=d['workspace']['schemes']
+          want=os.path.splitext(os.path.basename('$WS'))[0]
+          if want in schemes:
+              print(want)
+          else:
+              s=[x for x in schemes if not x.startswith('Pods-') and not x.startswith('EXApplication')]
+              print(s[0] if s else '')
+          ")
           if [ -z "$SCHEME" ]; then
             echo "::error::找不到 App scheme" >&2
             python3 -c "import json;print('available:',json.load(open('schemes.json'))['workspace']['schemes'])" >&2
