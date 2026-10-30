@@ -1,6 +1,6 @@
 {
   "app": {
-    "products": [{"name":"default","compileSdkVersion":"5.0.0(12)","compatibleSdkVersion":"5.0.0(12)","runtimeOS":"HarmonyOS"}],
+    "products": [{"name":"default","compileSdkVersion":"5.1.0(18)","compatibleSdkVersion":"5.0.0(12)","runtimeOS":"HarmonyOS"}],
     "buildModeSet": [{"name":"debug"},{"name":"release"}]
   },
   "modules": [{"name":"entry","srcPath":"./entry","targets":[{"name":"default","applyToProducts":["default"]}]}]

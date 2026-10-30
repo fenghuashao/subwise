@@ -198,6 +198,30 @@ jobs:
           du -sh "$APP"
           # 模拟器产物不是可分发的 IPA；物理真机与生产签名仍未验证。
           plutil -p "$APP/Info.plist" | grep -E 'CFBundleIdentifier|CFBundleShortVersionString|MinimumOSVersion' || true
+      - name: iOS 模拟器实跑校验
+        # 动态校验（启动模拟器、安装、拉起进程）。软失败：环境不具备时写入
+        # status=NOT_RUN 并附原因，不谎报通过，也不牵连已成功的构建。
+        id: ios_run
+        continue-on-error: true
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/ios-evidence
+        run: |
+          set -uo pipefail
+          # 注意：本 step 没有 working-directory，位于仓库根目录，脚本路径要从根算起。
+          SCRIPT=mobile/p03-b/rn/scripts/verify-ios-simulator.sh
+          chmod +x "$SCRIPT"
+          APP=$(cat "$RUNNER_TEMP/app-path.txt")
+          APP_PATH="$APP" EVIDENCE_DIR="$EVIDENCE_DIR" bash "$SCRIPT"
+          echo "--- ios-static.json ---"; cat "$EVIDENCE_DIR/ios-static.json"
+          echo "--- ios-run.json ---";    cat "$EVIDENCE_DIR/ios-run.json"
+      - name: 上传 iOS 实跑证据
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: subwise-p03b-ios-evidence
+          path: ${{ runner.temp }}/ios-evidence/
+          if-no-files-found: warn
+          retention-days: 30
       - uses: actions/upload-artifact@v4
         with:
           name: subwise-p03b-ios-simulator-app

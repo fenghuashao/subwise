@@ -1,0 +1,127 @@
+{
+  "task": "P03-B1 HarmonyOS track — Linux native ArkTS compilation",
+  "dateUtc": "2026-10-30",
+  "host": {
+    "os": "Ubuntu 22.04 x86_64 (Linux container)",
+    "guiIde": null
+  },
+  "toolchain": {
+    "source": "Huawei official repo.huaweicloud.com mirror",
+    "package": "commandline-tools-linux-x64-5.1.0.840.zip",
+    "packageBytes": 2153496473,
+    "packageSha256": "1dcefa4741dc289277560b2802040e0c45b433898d8db453d711d5376e0478f1",
+    "commandLineTools": "5.1.0.840",
+    "codelinter": "5.1.140",
+    "harmonyosSdk": "5.1.0 Release (include Ohos_sdk_public 5.1.0.125 (API Version 18 Release))",
+    "ohpm": "5.1.3",
+    "hstack": "5.1.0",
+    "hvigor": "5.18.5",
+    "java": "OpenJDK 20 (Zulu 20.28+85-CA)",
+    "bundledNode": "v18.20.1",
+    "sdkVersionResolved": "5.1.0.125 / API 18 (from sdk/default/openharmony/ets/oh-uni-package.json)"
+  },
+  "configChanges": [
+    {
+      "file": "build-profile.json5",
+      "field": "products[default].compileSdkVersion",
+      "before": "5.0.0(12)",
+      "after": "5.1.0(18)",
+      "why": "可用工具链仅含 API 18；不改动则报 00303168 SDK component missing",
+      "productImpact": "compatibleSdkVersion 保持 5.0.0(12)，设备最低要求不变"
+    },
+    {
+      "file": "oh-package.json5",
+      "field": "modelVersion",
+      "before": "(缺失)",
+      "after": "5.1.0",
+      "why": "hvigor 要求根 oh-package.json5 与 hvigor-config.json5 的 modelVersion 同时存在且一致，否则报 00303024"
+    },
+    {
+      "file": "hvigor/hvigor-config.json5",
+      "field": "modelVersion",
+      "before": "5.0.0",
+      "after": "5.1.0",
+      "why": "与上者须一致"
+    }
+  ],
+  "sourceChanges": [
+    {
+      "file": "entry/src/main/ets/Probe.ets",
+      "kind": "arkts-identifiers-as-prop-names + AssetMap 类型",
+      "before": "asset.AssetMap 以对象字面量 { [asset.Tag.ALIAS]: alias } 构造",
+      "after": "new Map<asset.Tag, asset.Value>([[asset.Tag.ALIAS, alias]])",
+      "evidence": "SDK @ohos.security.asset.d.ts:628 声明 type AssetMap = Map<Tag, Value>"
+    },
+    {
+      "file": "entry/src/main/ets/Probe.ets",
+      "kind": "arkts-limited-throw",
+      "before": "catch (error) { ...; throw error; }",
+      "after": "catch (error) { ...; const failure = error as BusinessError; throw new Error('seed_failed: ...') }"
+    },
+    {
+      "file": "entry/src/main/ets/Probe.ets",
+      "kind": "deprecated API",
+      "before": "TextDecoder.decodeWithStream (deprecated since 12)",
+      "after": "TextDecoder.decodeToString"
+    }
+  ],
+  "compile": {
+    "command": "hvigorw assembleHap --mode module -p product=default --no-daemon",
+    "beforeRound": {
+      "errors": 15,
+      "warnings": 3,
+      "errorCodes": [
+        "10605087 (arkts-limited-throw) x1",
+        "10605001 (arkts-identifiers-as-prop-names) x9",
+        "10505001 (AssetMap 类型不匹配) x4"
+      ],
+      "allIn": "entry/src/main/ets/Probe.ets"
+    },
+    "afterRound": {
+      "errors": 0,
+      "warnings": 2,
+      "warningsDetail": [
+        "SemVer：entry 模块版本号 0.0.1 不合规（hvigor 正则要求首段不得为 0，如 1.0.0）",
+        "No signingConfig found for product default（预期：本轮不做签名）"
+      ]
+    },
+    "buildSuccessful": true
+  },
+  "artifact": {
+    "path": "entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "bytes": 50768,
+    "sha256": "5de5742fa8dd57bdb38204872c25a4c4caeca2f0f0f2af2f8504eb44d39a93e0",
+    "signed": false,
+    "bundleName": "dev.subwise.p03b",
+    "entries": [
+      "module.json",
+      "resources.index",
+      "resources/rawfile/fixtures.json",
+      "resources/base/media/app_icon.svg",
+      "resources/base/profile/main_pages.json",
+      "ets/sourceMaps.map",
+      "ets/modules.abc",
+      "pack.info"
+    ],
+    "etsByteCode": {
+      "name": "ets/modules.abc",
+      "bytes": 34444,
+      "magic": "PANDA\u0000"
+    },
+    "reproducibleNote": "HAP 为 zip，内部条目携带构建时间戳，因此同等源码的两次构建 sha256 不同；该 sha256 标识本次产物，不代表内容寻址。"
+  },
+  "still_NOT_RUN": [
+    "HAP 签名（无 signingConfig，未使用真实证书）",
+    "设备安装 / 首次启动（无 HarmonyOS 设备或模拟器）",
+    "AssetStoreKit 运行时行为（写读删、删除后查询无记录）",
+    "RDB 事务语义与跨端一致性",
+    "通知权限请求与送达",
+    "无凭据 HTTPS 请求（网络与官方域）",
+    "UI、安全区、大字体、明暗主题"
+  ],
+  "notClaimed": [
+    "未声称鸿蒙端功能可用；仅 ArkTS 编译通过。",
+    "未使用 Android 兼容包或 RN OpenHarmony 替代原生工程。",
+    "未使用第三方/移植 SDK；编译所用为官方 HarmonyOS SDK。"
+  ]
+}

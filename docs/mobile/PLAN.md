@@ -3,8 +3,31 @@
 状态：FA 已于 2026-10-29 确认 UI V1，G01 通过；允许进入后续 Pi 开发与 FX 验收阶段。尚未启动 Pi 任务。
 
 更新（2026-10-30，Linux 云服务器轮次）：Android 原生构建与验收门已通过，APK 产出并在模拟器上实测通过（详见
-`p03-b1/P03-B1-LINUX-REPORT.md`）。iOS、HarmonyOS、物理真机、生产签名仍为 NOT_RUN。
+`p03-b1/P03-B1-LINUX-REPORT.md`）。物理真机与生产签名仍为 NOT_RUN。
+
+**更正（2026-10-30）**：上一版把 iOS 记为 NOT_RUN，与 CI 事实不符。核对 `2026-10-30T14:02:47` 那次
+Actions run（`41068371207`）后确认，iOS job 在 `macos-26` runner 上**已成功完成** 15 个步骤
+（prebuild → CocoaPods → xcodebuild → codesign 校验），并产出 artifact
+`subwise-p03b-ios-simulator-app`（14.18 MB）。故 iOS 状态应由 NOT_RUN 更正为「模拟器包已构建」。
+**真机运行、UI 自动化、功能断言仍为 NOT_RUN**，模拟器 App 是否成功拉起进程此前无人验证过。
+
+同轮新增两项推进（见对应文档）：
+- iOS：CI 增加「模拟器实跑校验」步骤，产出 `ios-static.json` / `ios-run.json` 机器可读证据
+  （脚本 `mobile/p03-b/rn/scripts/verify-ios-simulator.sh`）。软失败设计，环境不具备时记 NOT_RUN 并附原因。
+- HarmonyOS：**ArkTS 编译首次通过**，解除 `HARMONY-TRACK.md` 的编译 BLOCKED。使用官方
+  HarmonyOS 命令行工具链（CLI Tools 5.1.0.840 / SDK API 18 / hvigor 5.18.5），产出未签名 HAP
+  （50,768 字节）。签名、安装、运行、Asset/RDB/通知的运行时行为**仍全部 NOT_RUN**。
+  详见 `p03-b1/P03-B1-HARMONY-LINUX-REPORT.md`。
+
 本轮未进入 P03-C / P04，**P03-C 仍需 FA 单独授权**。
+
+三端状态汇总（截至 2026-10-30）：
+
+| 端 | 构建 | 模拟器/实跑 | 真机 | 生产签名 |
+|---|---|---|---|---|
+| Android | ✅ APK 19.62 MB | ✅ 模拟器实测通过 | NOT_RUN | ❌ debug 证书 |
+| iOS | ✅ 模拟器包 14.18 MB | ❌ NOT_RUN（本轮刚加实跑校验） | NOT_RUN | NOT_RUN |
+| HarmonyOS | ✅ 未签名 HAP 50 KB | NOT_RUN | NOT_RUN | NOT_RUN |
 
 ## 产品边界
 只交付 iOS、Android、HarmonyOS 手机 App。默认鸿蒙指原生 HarmonyOS，最低系统版本待确认。无需账户即可本机使用。离线指管理与查询本地数据，不含离线运行 AI 模型。当前 HTML 仅为设计评审载体，不是最终网站或 App 交付。

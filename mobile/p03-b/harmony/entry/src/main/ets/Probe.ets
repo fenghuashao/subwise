@@ -1,10 +1,13 @@
-// Candidate API 12 source. Compilation and every device capability are NOT_RUN.
+// ArkTS source verified against HarmonyOS SDK 5.1.0.125 (API 18).
+// Compilation: PASS (see docs/mobile/p03-b1/P03-B1-HARMONY-LINUX-REPORT.md).
+// Device install / run / notification delivery: still NOT_RUN.
 import { common } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
 import { asset } from '@kit.AssetStoreKit';
 import { util } from '@kit.ArkTS';
 import { http } from '@kit.NetworkKit';
 import { notificationManager } from '@kit.NotificationKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 
 interface Wallet { currency: string; total_balance: string; }
 interface DeepSeekFixture { is_available: boolean; balance_infos: Wallet[]; }
@@ -27,7 +30,7 @@ export class Probe {
   async seed(context: common.UIAbilityContext): Promise<void> {
     if (!this.db) throw new Error('not_ready');
     const bytes = await context.resourceManager.getRawFileContent('fixtures.json');
-    const text = new util.TextDecoder().decodeWithStream(bytes);
+    const text = new util.TextDecoder().decodeToString(bytes);
     const data = JSON.parse(text) as Fixtures;
     const rows: ProbeRow[] = [];
     if (typeof data.deepseek.is_available !== 'boolean' || data.minimax.contract !== 'subwise.synthetic.windows.v1') throw new Error('schema_error');
@@ -45,7 +48,12 @@ export class Probe {
     try {
       for (const row of rows) await this.db.executeSql('INSERT OR REPLACE INTO probe_rows(id,title,value,source) VALUES(?,?,?,?)', [row.id,row.title,row.value,row.source]);
       this.db.commit();
-    } catch (error) {this.db.rollBack(); throw error;}
+    } catch (error) {
+      this.db.rollBack();
+      // arkts-limited-throw：不能抛出任意类型，统一包成 Error 并保留原始码/信息。
+      const failure = error as BusinessError;
+      throw new Error(`seed_failed: ${failure.code} ${failure.message}`);
+    }
   }
   async read(): Promise<ProbeRow[]> {
     if (!this.db) throw new Error('not_ready');
@@ -60,16 +68,32 @@ export class Probe {
     const encoder = new util.TextEncoder();
     const alias = encoder.encodeInto('subwise.p03b.synthetic');
     const marker = encoder.encodeInto('PUBLIC_SYNTHETIC_NOT_A_KEY');
-    const query: asset.AssetMap = { [asset.Tag.ALIAS]: alias };
+    // asset.AssetMap 在可用 SDK 中已定义为 Map<Tag, Value>，不再是对象字面量；
+    // ArkTS 严格模式同时禁止非标识符属性名（arkts-identifiers-as-prop-names），
+    // 因此统一改用 Map 构造，语义与原意图一致。
+    const query: asset.AssetMap = new Map<asset.Tag, asset.Value>([[asset.Tag.ALIAS, alias]]);
     // Remove only this test alias; never enumerate user assets.
     try {
-      await asset.add({[asset.Tag.ALIAS]:alias,[asset.Tag.SECRET]:marker,[asset.Tag.ACCESSIBILITY]:asset.Accessibility.DEVICE_UNLOCKED,[asset.Tag.SYNC_TYPE]:asset.SyncType.NEVER});
-      const found = await asset.query({[asset.Tag.ALIAS]:alias,[asset.Tag.RETURN_TYPE]:asset.ReturnType.ALL});
+      const attrs: asset.AssetMap = new Map<asset.Tag, asset.Value>([
+        [asset.Tag.ALIAS, alias],
+        [asset.Tag.SECRET, marker],
+        [asset.Tag.ACCESSIBILITY, asset.Accessibility.DEVICE_UNLOCKED],
+        [asset.Tag.SYNC_TYPE, asset.SyncType.NEVER]
+      ]);
+      await asset.add(attrs);
+      const found = await asset.query(new Map<asset.Tag, asset.Value>([
+        [asset.Tag.ALIAS, alias],
+        [asset.Tag.RETURN_TYPE, asset.ReturnType.ALL]
+      ]));
       if (found.length !== 1) throw new Error('secure_read_failed');
-      const secret = found[0][asset.Tag.SECRET] as Uint8Array;
-      if (new util.TextDecoder().decodeWithStream(secret) !== 'PUBLIC_SYNTHETIC_NOT_A_KEY') throw new Error('secure_read_failed');
+      const secret = found[0].get(asset.Tag.SECRET);
+      if (!(secret instanceof Uint8Array)) throw new Error('secure_read_failed');
+      if (new util.TextDecoder().decodeToString(secret) !== 'PUBLIC_SYNTHETIC_NOT_A_KEY') throw new Error('secure_read_failed');
     } finally {await asset.remove(query);}
-    const remaining = await asset.query({[asset.Tag.ALIAS]:alias,[asset.Tag.RETURN_TYPE]:asset.ReturnType.ATTRIBUTES});
+    const remaining = await asset.query(new Map<asset.Tag, asset.Value>([
+      [asset.Tag.ALIAS, alias],
+      [asset.Tag.RETURN_TYPE, asset.ReturnType.ATTRIBUTES]
+    ]));
     if (remaining.length !== 0) throw new Error('secure_delete_failed');
     return '测试标记写读删完成';
   }
