@@ -67,11 +67,22 @@ jobs:
       - name: 安装 Android SDK 组件
         run: |
           set -euo pipefail
+          # GitHub runner 镜像预装 SDK 到 $ANDROID_HOME，但没有把 cmdline-tools 放进 PATH，
+          # 所以必须显式补上，否则 sdkmanager 报 "command not found"。
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMANAGER" ]; then
+            SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -name sdkmanager -type f 2>/dev/null | head -1 || true)
+          fi
+          if [ -z "$SDKMANAGER" ] || [ ! -x "$SDKMANAGER" ]; then
+            echo "::error::runner 上找不到 sdkmanager" >&2
+            exit 1
+          fi
+          echo "using: $SDKMANAGER"
           # 版本来源：react-native 0.83.10 的 gradle/libs.versions.toml
           #   compileSdk 36 / buildTools 36.0.0 / ndk 27.1.12297006
-          # CMake 3.22.1 = 本机 Linux 端已实测通过的版本（Linux 构建用同一版本以保持一致）
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          # CMake 3.22.1 = 本机 Linux 端已实测通过的版本（保持两端一致）
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+          yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
           ls "$ANDROID_HOME/cmake"
       - name: 安装 JS 依赖
         working-directory: mobile/p03-b/rn
@@ -107,8 +118,11 @@ jobs:
 
   ios:
     name: iOS simulator app (build only)
-    runs-on: macos-15
-    timeout-minutes: 60
+    # macos-26：Expo SDK 55 要求 Xcode 26.2+（见 https://docs.expo.dev/versions/v55.0.0）。
+    # macos-15 只有 Xcode 16.4，编译 expo-modules-core 的 Swift 6 代码会报
+    # "unknown attribute 'MainActor'" 等并发隔离错误。
+    runs-on: macos-26
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -123,6 +137,7 @@ jobs:
       - name: 记录工具链版本
         run: |
           xcodebuild -version
+          xcodebuild -showsdks | grep -i iphone
           node --version
           pod --version
       - name: 安装 JS 依赖
@@ -143,7 +158,13 @@ jobs:
           WS=$(ls -d *.xcworkspace | head -1)
           echo "workspace: $WS"
           xcodebuild -list -json -workspace "$WS" > schemes.json
-          SCHEME=$(python3 -c "import json;d=json.load(open('schemes.json'));s=[x for x in d['workspace']['schemes'] if not x.startswith('Pods-')];print(s[0])")
+          # scheme 必须匹配 App target（工作区里还包含 Pods 的 EXApplication 等 scheme）
+          SCHEME=$(python3 -c "import json;d=json.load(open('schemes.json'));s=[x for x in d['workspace']['schemes'] if not x.startswith('Pods-') and x!='EXApplication'];print(s[0] if s else '')")
+          if [ -z "$SCHEME" ]; then
+            echo "::error::找不到 App scheme" >&2
+            python3 -c "import json;print('available:',json.load(open('schemes.json'))['workspace']['schemes'])" >&2
+            exit 1
+          fi
           echo "scheme: $SCHEME"
           xcodebuild \
             -workspace "$WS" \
