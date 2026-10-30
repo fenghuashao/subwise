@@ -1,0 +1,148 @@
+{
+  "phase": "P03-B1-LINUX",
+  "date": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "host": {
+    "os": "Ubuntu 24.04 / Linux 6.8.0-138-generic",
+    "cpu": "4 cores",
+    "memoryMB": 3659,
+    "swapMB": 1987,
+    "kvm": false,
+    "note": "本轮在云服务器完成，非 FA 的 Windows/Mac 开发机。无 /dev/kvm，模拟器走 TCG 软件模拟。"
+  },
+  "overall": "ANDROID_GATE_PASSED",
+  "scope": "本轮只解阻并验证 Android 一端；iOS 与 HarmonyOS 仍为 NOT_RUN，不作为三端完成。",
+  "blockerRootCause": {
+    "previous": "P03-B1 报告记录：官方 Gradle/Maven/SDK 依赖下载在 TLS handshake 阶段反复中断，3 次原生构建全部 FAIL，APK 未产出。",
+    "actual": "官方 services.gradle.org 在本网络为 307 跳转 + 10 秒读超时；Gradle wrapper 默认 networkTimeout=10000 直接抛 SocketTimeoutException，构建从未真正进入编译阶段。",
+    "fix": [
+      "Gradle 发行版改为从腾讯云镜像下载，并用官方 sha256 (8fad3d78296ca518113f3d29016617c7f9367dc005f932bd9d93bf45ba46072b) 校验一致",
+      "GRADLE_USER_HOME/init.gradle 通过 beforeSettings 钩子把 pluginManagement / allprojects 仓库改走 maven.aliyun.com 镜像",
+      "sdkmanager 19.0 不支持 --sdk / --no-metrics，改用 --sdk_root（首次调用因此失败）",
+      "内存受限：gradle.properties 调为 org.gradle.parallel=false、jvmargs -Xmx900m，构建用 --max-workers=1"
+    ]
+  },
+  "android": {
+    "sdkRoot": ".local/p03-b1/sdk",
+    "installedPackages": [
+      "platform-tools",
+      "platforms;android-36",
+      "build-tools;36.0.0",
+      "ndk;27.1.12297006",
+      "cmake;3.22.1",
+      "system-images;android-30;default;x86_64",
+      "system-images;android-34;google_apis;x86_64"
+    ],
+    "packageFilesVerified": {
+      "platforms/android-36/android.jar": true,
+      "build-tools/36.0.0/aapt2": true,
+      "ndk/27.1.12297006/source.properties": true,
+      "cmake/3.22.1/bin/cmake": true,
+      "platform-tools/adb": true
+    },
+    "gradle": {
+      "version": "9.0.0",
+      "distributionSha256Verified": true,
+      "command": "./gradlew -p . assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon --console plain --max-workers=1",
+      "exitCode": 0,
+      "status": "PASS",
+      "result": "BUILD SUCCESSFUL in 5m 30s, 256 actionable tasks: 218 executed, 38 up-to-date"
+    },
+    "apk": {
+      "path": "mobile/p03-b/rn/android/app/build/outputs/apk/release/app-release.apk",
+      "bytes": 27560663,
+      "sha256": "52e9f1ded9a9cea9db0b0437c9616fd35be8744b0717454f3e188925d94c1531",
+      "packageName": "dev.subwise.p03b",
+      "versionName": "0.0.1",
+      "minSdk": 24,
+      "targetSdk": 36,
+      "compileSdk": 36,
+      "apksigner": "Verifies; v2 scheme true",
+      "signer": "CN=Android Debug (Expo 模板 debug 证书，仅测试用，非生产发布签名)",
+      "nativeLibs": "libappmodules.so / libexpo-modules-core.so / libexpo-sqlite.so / libhermesvm.so (x86_64)",
+      "jsBundle": "assets/index.android.bundle (1150164 bytes)",
+      "install": "pm install -r -t -> Success",
+      "packageListed": "package:dev.subwise.p03b"
+    },
+    "runtimeGate": {
+      "device": "emulator-5554 (AVD subwise_api30, Android 11 / API 30, x86_64, TCG 软件模拟)",
+      "bootCompleted": "1",
+      "bootSeconds": 412,
+      "appLaunch": "PASS",
+      "mResumedActivity": "dev.subwise.p03b/.MainActivity",
+      "crash": "NONE (logcat 无 FATAL/AndroidRuntime 异常)",
+      "rnRuntime": "ReactNativeJS: Running \"main\"",
+      "sqlite": {
+        "status": "PASS",
+        "evidence": "点击「写入模拟数据并从 SQLite 读取」→ 状态变为「模拟适配器 → SQLite → UI 完成；非平台同步」，UI 显示 CNY 110.00 / USD 0.00 / 剩余 62 / 100"
+      },
+      "appRestartPersistence": {
+        "status": "PASS",
+        "method": "am force-stop dev.subwise.p03b → 重新 monkey 启动",
+        "evidence": "重启后仍显示 CNY 110.00 / USD 0.00 / 剩余 62 / 100，状态「SQLite 已打开 · 已读取本地记录」"
+      },
+      "offlineColdStart": {
+        "status": "PASS",
+        "method": "airplane-mode enable + wifi/data disable → force-stop → 重新启动",
+        "evidence": "断网冷启动后仍打开 SQLite 并显示本地快照"
+      },
+      "secureStore": {
+        "status": "PASS",
+        "evidence": "状态「安全存储写 / 读 / 删通过（仅测试标记）」；logcat 出现 Android Keystore 真实条目 keystore: del USRPKEY_AES/GCM/NoPadding:key_v1:keystoreUnauthenticated"
+      },
+      "httpsProbe": {
+        "status": "PASS",
+        "evidence": "状态「HTTPS HTTP 401 · 符合预期 · 未认证」（固定官方 DeepSeek 地址，无 Authorization）"
+      },
+      "notifications": {
+        "status": "PASS",
+        "evidence": "系统通知记录 NotificationRecord(pkg=dev.subwise.p03b, channel=p03b, importance=3, bigText=模拟本地通知) 确认已投递；点击取消后状态「已清理本轮通知请求」",
+        "caveat": "API 30 模拟器，锁屏/重启/时区/月底续费提醒未实现也未验收"
+      },
+      "navigation": {
+        "status": "PASS",
+        "evidence": "四导航 总览 / 订阅 / 用量 / 我的 均可切换；「我的」页四个功能按钮全部可见"
+      },
+      "physicalDevice": "NOT_RUN"
+    }
+  },
+  "ios": {
+    "access": "BLOCKED",
+    "reason": "本机为 Linux，无 Mac/Xcode/CocoaPods",
+    "build": "NOT_RUN",
+    "runtime": "NOT_RUN"
+  },
+  "harmony": {
+    "toolchain": "BLOCKED",
+    "reason": "PATH 及标准目录未定位到 DevEco/Hvigor 工具链",
+    "build": "NOT_RUN",
+    "runtime": "NOT_RUN"
+  },
+  "webProbe": {
+    "status": "PASS",
+    "scope": "P03-B 探针 Web 版（expo-sqlite WASM，真实 SQLite 非替身）",
+    "method": "Playwright + Chromium 真实浏览器",
+    "evidence": "写入模拟数据 → 重新读取 → 模拟响应损坏后显示「验证失败 · 已保留最后成功记录」且旧快照仍在 → 页面重载后快照仍在",
+    "typecheck": "tsc --noEmit exit 0",
+    "unitTests": "node --test: 8 passed / 0 failed",
+    "nativeBundles": "expo export android+ios → .hbc 各 1.9MB 生成成功"
+  },
+  "webApp": {
+    "status": "PASS",
+    "scope": "仓库根目录 index.html / app.js / styles.css 前端工作台",
+    "method": "Playwright + Chromium，server.js 起在 127.0.0.1:4173",
+    "evidence": "六个视图 overview/subscriptions/usage/calendar/analytics/settings 全部切换成功；新增订阅弹窗可打开且含 10 个输入项",
+    "known": "favicon.ico 返回 404（控制台唯一报错，页面无 link favicon，属可修复的轻微项）"
+  },
+  "server": {
+    "status": "PASS",
+    "syntax": "npm run check exit 0 (node --check server.js && node --check app.js)",
+    "capabilities": "GET /api/capabilities 正常返回两个平台 configured:false",
+    "notConfigured": "POST /api/usage/minimax 无密钥 → not_configured，提示文案正确",
+    "upstreamReachable": "伪密钥 POST /api/usage/minimax 成功抵达官方接口并返回真实上游报错「login fail」，说明代理链路与错误分类可用",
+    "deepseekEndpoint": "GET https://api.deepseek.com/user/balance 直连返回 401，网络可达"
+  },
+  "committedOrPushed": false,
+  "nextPhaseStarted": false,
+  "frameworkDecision": "Android 一端原生门已通过，RN/Expo 路线获得实证支持；仍不能据此宣称三端完成，也不自动等同 P03-C 授权。"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "scope": "P03-B1-Linux 轮次证据自检；不替代 iOS / HarmonyOS / 真机验收",
+  "at": "2026-10-30T01:54:03.205Z",
+  "baselineFilesVerified": 23,
+  "apkHashVerified": true,
+  "androidGate": "PASSED",
+  "iosGate": "NOT_RUN",
+  "harmonyGate": "NOT_RUN",
+  "physicalDevice": "NOT_RUN"
+}

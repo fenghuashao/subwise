@@ -1,0 +1,94 @@
+[
+  {
+    "path": "app.js",
+    "sha256": "5836F5A8EDA672D6FC08D6445FEC7DF92BD40A0BFB663DBABC8E19062B808225"
+  },
+  {
+    "path": "docs/mobile/p03-b1/HARMONY-TRACK.md",
+    "sha256": "47125CC2C9D172E1A52451EE7D6BF1EE6CBC4880E42D15D18D9278CBA69DACB0"
+  },
+  {
+    "path": "docs/mobile/p03-b1/MAC-TASK.md",
+    "sha256": "CA3597627E5F06E8647B9D66688CE2D8AF1898F7BA00CFBBA6B90012B74C9AC8"
+  },
+  {
+    "path": "docs/mobile/p03-b1/README.md",
+    "sha256": "79AE9984B364642956B2A96EB425A6EE2803549105E037EA23F226FE91D5AE92"
+  },
+  {
+    "path": "docs/mobile/p03-b1/SUBWISE-P03-B1-REPORT.html",
+    "sha256": "725194B34FA91BC0E11C2BDA2D44FA63A8FCE721E35A1C7EA7F0B18723ACCD1B"
+  },
+  {
+    "path": "docs/mobile/p03-b1/build-report.mjs",
+    "sha256": "6FAD09CCD9D4266991212393AA855665B96E9138BCC4C21BEA108CEC694BEE90"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/acceptance.json",
+    "sha256": "A5150F642B69474600F69F0227E215823A5FA8C3DF10018F5E8B8A5744CC2631"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/baseline.json",
+    "sha256": "948EC2DEA9D2A443DB509ABD32D7057DBB2BC6698D872BF97291C5E5070562A4"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/emulator-boot.png",
+    "sha256": "D341EE1F78CAB9BB46503F7F5EC899DE5A765D6B59500AABB41004CDB69D8050"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/emulator-observation.json",
+    "sha256": "77AE96BFAFFD8E09FE9D75D5E3D70ABE039E92AD5E9BA2C2216BC1A21AE88DEB"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/emulator.json",
+    "sha256": "EF33C82189E465879165E607BBD0C6654077B3BECF260432EE5E00EA59F0BCAF"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/environment-summary.json",
+    "sha256": "0B7B5141BD2C8BCBB652050F0B3FB941F9126FFFAA862B1DE460D80148CE3E53"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/mac-archive-inspection.json",
+    "sha256": "C86A6665552CE293F0191CF76BACAB61EDE9E9749D5A518ECA2AEFD2FA4FB2E7"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/preservation.json",
+    "sha256": "30530B021C19B287B04369BA1594264CF57B23218F7072882ACCCAD7FABCE024"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/report-validation.json",
+    "sha256": "CF760551523CD7FB92014B47F7BCA1B370090B0EBAD9720F04643457C87DC3FE"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/sdk-archives.json",
+    "sha256": "51D0E3E7C8DA027636A19CB228284A0CA348CD72D95642AE99E4A8A2D174FB87"
+  },
+  {
+    "path": "docs/mobile/p03-b1/evidence/sdk-files.json",
+    "sha256": "80908827942B2531F69BA449FA83DC26BEABD4D091A4EA6239F15CDFDC4F42DD"
+  },
+  {
+    "path": "docs/mobile/p03-b1/verify-report.mjs",
+    "sha256": "87374C2955BDE4A6DEAF36ABD56F60434159148B328A5F9A254FC8153FD5DA58"
+  },
+  {
+    "path": "docs/mobile/ui-preview.html",
+    "sha256": "2C02E8715B23676621FCEC614226C33FBEFA62160B88A2CB4893DF6D68ECC73B"
+  },
+  {
+    "path": "index.html",
+    "sha256": "0D20239A6AA662E413DF7C8B036E4EAB8AA275E19238550AEC27BD9B59CFD405"
+  },
+  {
+    "path": "package.json",
+    "sha256": "FDB44012C9E3FCE4201E7E8BE6AC6B4EA830082B778B897BACE404C6A60E46A7"
+  },
+  {
+    "path": "server.js",
+    "sha256": "7364A0F0545BB79C249666D718BF247C329991D1DAA1539CC574ED8DDC97A5B9"
+  },
+  {
+    "path": "styles.css",
+    "sha256": "09AD7B81228C7121A744941D740B738DA8A26E7A67F390D8D877ACB0F5379EA9"
+  }
+]
