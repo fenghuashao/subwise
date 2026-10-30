@@ -1,0 +1,173 @@
+name: Build Mobile Artifacts
+
+# 只构建，不发布。产物以 Actions artifact 形式提供（可下载安装），不创建 GitHub Release，
+# 不上传任何应用商店，不使用任何真实平台凭据。
+#
+# Android 签名说明：本工作流使用 Expo 模板自带的 debug 证书（CN=Android Debug）。
+# 该签名可用于个人设备侧载安装，但**不是生产发布签名**。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/p03-b/rn/**'
+      - '.github/workflows/build-mobile.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-mobile-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  EXPO_NO_TELEMETRY: '1'
+  CI: 'true'
+
+jobs:
+  verify:
+    name: Verify (web + probe)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/p03-b/rn/package-lock.json
+      - name: Web 工作台语法检查
+        run: npm run check
+      - name: 安装探针依赖
+        working-directory: mobile/p03-b/rn
+        run: npm ci --include=dev --no-audit --no-fund
+      - name: 探针类型检查
+        working-directory: mobile/p03-b/rn
+        run: npm run check
+      - name: 探针单测
+        working-directory: mobile/p03-b/rn
+        run: npm test
+
+  android:
+    name: Android APK (arm64-v8a + armeabi-v7a)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/p03-b/rn/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: 安装 Android SDK 组件
+        run: |
+          set -euo pipefail
+          # 版本来源：react-native 0.83.10 的 gradle/libs.versions.toml
+          #   compileSdk 36 / buildTools 36.0.0 / ndk 27.1.12297006
+          # CMake 3.22.1 = 本机 Linux 端已实测通过的版本（Linux 构建用同一版本以保持一致）
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          ls "$ANDROID_HOME/cmake"
+      - name: 安装 JS 依赖
+        working-directory: mobile/p03-b/rn
+        run: npm ci --include=dev --no-audit --no-fund
+      - name: 生成原生工程（prebuild）
+        working-directory: mobile/p03-b/rn
+        run: npx expo prebuild --platform android --no-install
+      - name: 构建 release APK
+        working-directory: mobile/p03-b/rn/android
+        run: |
+          ./gradlew assembleRelease \
+            -PreactNativeArchitectures=arm64-v8a,armeabi-v7a \
+            --no-daemon --console plain --max-workers=2
+      - name: 校验 APK
+        working-directory: mobile/p03-b/rn/android
+        run: |
+          set -euo pipefail
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -f "$APK"
+          echo "size: $(stat -c%s "$APK") bytes"
+          sha256sum "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/aapt2" dump badging "$APK" | head -4
+          echo "--- ABIs ---"
+          unzip -l "$APK" | grep -oE 'lib/[a-z0-9_-]+/' | sort -u
+          echo "--- native libs ---"
+          unzip -l "$APK" | grep -E 'lib/(arm64-v8a|armeabi-v7a)/.*\.so$' | awk '{print $4}' | sort
+      - uses: actions/upload-artifact@v4
+        with:
+          name: subwise-p03b-android-apk
+          path: mobile/p03-b/rn/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  ios:
+    name: iOS simulator app (build only)
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/p03-b/rn/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: 记录工具链版本
+        run: |
+          xcodebuild -version
+          node --version
+          pod --version
+      - name: 安装 JS 依赖
+        working-directory: mobile/p03-b/rn
+        run: npm ci --include=dev --no-audit --no-fund
+      - name: 生成原生工程（prebuild）
+        working-directory: mobile/p03-b/rn
+        run: npx expo prebuild --platform ios --no-install
+      - name: 安装 CocoaPods 依赖
+        working-directory: mobile/p03-b/rn/ios
+        run: pod install
+      - name: 构建 iOS 模拟器包
+        working-directory: mobile/p03-b/rn/ios
+        env:
+          DERIVED: ${{ github.workspace }}/.local/p03-b1/ios-derived
+        run: |
+          set -euo pipefail
+          WS=$(ls -d *.xcworkspace | head -1)
+          echo "workspace: $WS"
+          xcodebuild -list -json -workspace "$WS" > schemes.json
+          SCHEME=$(python3 -c "import json;d=json.load(open('schemes.json'));s=[x for x in d['workspace']['schemes'] if not x.startswith('Pods-')];print(s[0])")
+          echo "scheme: $SCHEME"
+          xcodebuild \
+            -workspace "$WS" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$DERIVED" \
+            build
+          APP=$(find "$DERIVED/Build/Products/Release-iphonesimulator" -maxdepth 1 -name '*.app' | head -1)
+          test -n "$APP"
+          echo "product: $APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          echo "$APP" > "$RUNNER_TEMP/app-path.txt"
+      - name: 记录 iOS 产物信息
+        run: |
+          set -euo pipefail
+          APP=$(cat "$RUNNER_TEMP/app-path.txt")
+          du -sh "$APP"
+          # 模拟器产物不是可分发的 IPA；物理真机与生产签名仍未验证。
+          plutil -p "$APP/Info.plist" | grep -E 'CFBundleIdentifier|CFBundleShortVersionString|MinimumOSVersion' || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: subwise-p03b-ios-simulator-app
+          path: ${{ github.workspace }}/.local/p03-b1/ios-derived/Build/Products/Release-iphonesimulator/*.app
+          if-no-files-found: error
+          retention-days: 30
