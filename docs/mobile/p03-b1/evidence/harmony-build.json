@@ -1,0 +1,16 @@
+{
+  "generatedAtUtc": "2026-10-30T17:58:37.112197+00:00",
+  "status": "COMPILE_OK",
+  "reason": null,
+  "buildLog": "/workspace/subwise/docs/mobile/p03-b1/evidence/build.log",
+  "hap": {
+    "path": "/workspace/subwise/mobile/p03-b/harmony/entry/build/default/outputs/default/entry-default-unsigned.hap",
+    "bytes": 50768,
+    "sha256": "5de5742fa8dd57bdb38204872c25a4c4caeca2f0f0f2af2f8504eb44d39a93e0",
+    "signed": false
+  },
+  "diagnostics": {
+    "errors": 0,
+    "warnings": 2
+  }
+}

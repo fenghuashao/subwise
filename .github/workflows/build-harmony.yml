@@ -1,0 +1,83 @@
+name: Build HarmonyOS HAP
+
+# 只构建，不发布、不签名、不上架、不使用任何凭据。
+#
+# 为什么仅限手动触发：
+# 工具链压缩包 2.1 GB（解压约 6.5 GB），每次 push 都跑代价过高。
+# 需要复现/复核鸿蒙编译证据时，在 Actions 页面手动 Run workflow。
+#
+# 产出物边界：本流程产出**未签名** HAP，只能用于编译验证。
+# 它不等于可安装、不等于可运行，更不能代表 native HarmonyOS 验收通过。
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-harmony
+  cancel-in-progress: true
+
+jobs:
+  harmony:
+    name: Compile ArkTS probe (unsigned HAP)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      OHOS_CLT_HOME: ${{ github.workspace }}/.local/ohos-clt
+      # 固定版本与摘要，避免"换个工具链版本就说通过"这类不可比对的结论
+      CLT_VERSION: '5.1.0.840'
+      CLT_ZIP_SHA256: '1dcefa4741dc289277560b2802040e0c45b433898d8db453d711d5376e0478f1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # 工具链按「版本 + 摘要」缓存；摘要不匹配会在脚本里被拒绝使用，不会静默降级。
+      - name: 缓存命令行工具链
+        id: clt-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.OHOS_CLT_HOME }}
+          key: ohos-clt-${{ runner.os }}-${{ env.CLT_VERSION }}-${{ env.CLT_ZIP_SHA256 }}
+
+      - name: 编译并产出证据
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/harmony-evidence
+          SKIP_DOWNLOAD: ${{ steps.clt-cache.outputs.cache-hit == 'true' && '1' || '0' }}
+        run: |
+          set -uo pipefail
+          cd mobile/p03-b/harmony
+          bash scripts/build-harmony-linux.sh
+          echo "--- harmony-build.json ---"
+          cat "$EVIDENCE_DIR/harmony-build.json"
+
+      - name: 上传 HAP 与证据
+        uses: actions/upload-artifact@v4
+        with:
+          name: subwise-p03b-harmony-unsigned-hap
+          path: |
+            mobile/p03-b/harmony/entry/build/default/outputs/default/entry-default-unsigned.hap
+            ${{ runner.temp }}/harmony-evidence/harmony-build.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: 概要
+        run: |
+          python3 - <<'PY'
+          import json, os
+          p = os.path.join(os.environ.get('RUNNER_TEMP',''), 'harmony-evidence', 'harmony-build.json')
+          d = json.load(open(p))
+          print('status   :', d['status'])
+          print('errors   :', d['diagnostics']['errors'])
+          print('warnings :', d['diagnostics']['warnings'])
+          if 'hap' in d:
+              print('signed   :', d['hap']['signed'])
+              print('sha256   :', d['hap']['sha256'])
+          print()
+          print('注意：未签名 HAP。安装 / 运行 / 签名发布 仍为 NOT_RUN。')
+          PY
