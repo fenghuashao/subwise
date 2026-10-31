@@ -107,7 +107,7 @@ record() {
     "$BUNDLE" "${SIM_UDID:-}" "${SIM_NAME:-}" "${SIM_RT:-}" \
     "${LAUNCH_PID:-}" "${SHOT_OK:-false}" "${LOG_LINES:-0}" <<'PY'
 import json, sys, datetime
-(out, status, error, bundle, udid, dev, rt, xpid, shot, loglen) = sys.argv[1:10]
+(out, status, error, bundle, udid, dev, rt, xpid, shot, loglen) = sys.argv[1:11]
 json.dump({
   "generatedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
   "status": status,
