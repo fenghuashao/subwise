@@ -15,10 +15,20 @@
 # 退出码：
 #   始终 0。失败写入 JSON 的 status/error 字段，由 CI 决定是否阻断。
 #
+# JSON 的 status 取值：
+#   RUN       App 进程在 iOS 模拟器中真实启动
+#   NOT_RUN   环境不具备，本次未执行（附原因）
+#   ERROR     脚本自身异常终止（崩溃 / 被 kill / 证据写入失败）
+#
 # 实现注意（2026-11-01 修复）：不要在「VAR=val ... \ 续行」块中插入空行——
 # 反斜杠续行会先接上空行、随后空行的换行即终止命令，赋值与后续命令被拆开，
 # 变量无法进入 python 的 os.environ（表现为证据 JSON 全空壳）。
 # 本版一律把数据经 argv 传给 python，不再依赖环境变量接力。
+#
+# 实现注意（2026-11-02 补充）：EXIT 兜底保证「文件不存在」不再是可能状态。
+# 之前脚本崩溃时 ios-run.json 整个不产出，而上传步骤用 if-no-files-found: warn，
+# 于是「脚本崩了」与「环境不具备（文件里写着 NOT_RUN）」在 CI 上表现完全一样，
+# 无法区分。现在任何原因提前退出都会补写一份 status=ERROR 的记录。
 
 set -uo pipefail
 
@@ -35,6 +45,20 @@ STATIC="$OUT_DIR/ios-static.json"
 RUN="$OUT_DIR/ios-run.json"
 SHOT="$OUT_DIR/ios-simulator.png"
 
+# EXIT 兜底（2026-11-02 新增）
+#
+# 目的：让「证据文件不存在」不再是可能状态。
+# 之前脚本崩溃时 ios-run.json 整个不产出，上传步骤又是 if-no-files-found: warn，
+# 于是「脚本崩了」与「环境不具备（文件里写着 NOT_RUN）」在 CI 上完全一样，看不出区别。
+# 现在任何非正常结束都会补写一份 status=ERROR 的记录。
+#
+# 实现要点：
+#   * 用 FINAL_RECORDED 标记区分「已经由 record() 正常写过」与「异常中止」。
+#   * trap 在静态核验之前就安装 —— 静态核验段本身也可能崩
+#     （如 python heredoc 失败、.app 路径非法），晚装就覆盖不到。
+#   * 兜底自身失败（如 python 不可用）只打印警告，不改变退出码，也不掩盖原始失败。
+FINAL_RECORDED=0
+
 # 用法: write_json <file> <payload-json-string>
 write_json() {
   python3 -c 'import sys; open(sys.argv[1], "w").write(sys.argv[2])' "$1" "$2"
@@ -43,6 +67,37 @@ write_json() {
 utcnow() { date -u +%Y-%m-%dT%H:%M:%S+00:00; }
 
 json_escape() { python3 -c 'import json,sys; sys.stdout.write(json.dumps(sys.argv[1]))' "$1"; }
+
+# EXIT 兜底：脚本非正常结束时补写 status=ERROR。
+# 只在「尚未由 record() 写过结论」时才写，避免覆盖真实结论。
+# 兜底自身出错（例如 python 不可用）只打印警告，不改变退出码，也不掩盖原始失败。
+on_exit() {
+  local rc=$?
+  if [[ "$FINAL_RECORDED" -eq 0 ]]; then
+    echo "::error::脚本在未产出结论的情况下结束（exit=$rc），补写 status=ERROR 证据" >&2
+    python3 - "$RUN" "$rc" <<'PY' || echo "::error::兜底写入失败：$RUN 仍不存在" >&2
+import json, sys, datetime
+out, rc = sys.argv[1], sys.argv[2]
+json.dump({
+  "generatedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+  "status": "ERROR",
+  "error": "脚本异常终止，未能完成核验（exit=%s）。这是脚本自身失败，不等于环境不具备。" % rc,
+  "bundleIdentifier": None,
+  "simulatorUdid": None,
+  "simulatorName": None,
+  "simulatorRuntime": None,
+  "launchPid": None,
+  "screenshot": False,
+  "logLines": 0,
+  "note": "status=ERROR 表示校验脚本自身崩溃或被中断；status=NOT_RUN 才表示环境不具备、本次未执行。",
+}, open(out, "w"), indent=2, ensure_ascii=False)
+PY
+  fi
+  # 已有的模拟器 shutdown 收尾（SIM_UDID 只在动态核验段才有值）
+  [[ -n "${SIM_UDID:-}" ]] && xcrun simctl shutdown "$SIM_UDID" >/dev/null 2>&1 || true
+  return $rc
+}
+trap on_exit EXIT
 
 ########################################################################
 # 一、静态核验：不依赖模拟器是否可用
@@ -122,6 +177,7 @@ json.dump({
   "note": "状态 RUN 表示 App 进程在 iOS 模拟器中真实启动；未含真机、UI 自动化或功能断言。",
 }, open(out, "w"), indent=2, ensure_ascii=False)
 PY
+  FINAL_RECORDED=1
 }
 
 if ! command -v xcrun >/dev/null 2>&1; then
@@ -157,7 +213,8 @@ if [[ -z "$SIM_UDID" ]]; then
 fi
 echo "选用模拟器：$SIM_NAME ($SIM_RT) $SIM_UDID"
 
-trap 'xcrun simctl shutdown "$SIM_UDID" >/dev/null 2>&1 || true' EXIT
+# 模拟器 shutdown 已并入 on_exit 的 EXIT trap（2026-11-02），
+# 不再单独设 trap，避免覆盖兜底逻辑。
 
 if ! xcrun simctl boot "$SIM_UDID" >/dev/null 2>&1; then
   xcrun simctl erase "$SIM_UDID" >/dev/null 2>&1 || true

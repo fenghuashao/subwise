@@ -1,0 +1,333 @@
+{
+  "task": "Subwise P03-B1 状态复核轮 —— 独立复验与文档纠错",
+  "dateLocal": "2026-11-02 (Asia/Shanghai)",
+  "host": {
+    "os": "Ubuntu / Linux 6.8.0-138-generic",
+    "cpu": "4 核",
+    "ram": "3.6GB",
+    "kvm": false
+  },
+  "repository": {
+    "head": "6a8b94f36c54d64bc33bb2379110f5e1ca8ca92c",
+    "originMain": "6a8b94f36c54d64bc33bb2379110f5e1ca8ca92c",
+    "inSync": true,
+    "workingTreeChanges": [
+      " M docs/mobile/PLAN.md"
+    ],
+    "pulledCommits": [
+      "66c3dc1 feat(p03-b1): HarmonyOS ArkTS 首次编译通过 + iOS 模拟器实跑校验 (#1)",
+      "6a8b94f fix(ci): 修复 iOS 证据 JSON 全空壳与 record() off-by-one (#2)"
+    ]
+  },
+  "harmonyCompilation": {
+    "toolchain": {
+      "source": "repo.huaweicloud.com 官方镜像",
+      "commandLineTools": "5.1.0.840",
+      "packageBytes": 2153496473,
+      "packageSha256": "1dcefa4741dc289277560b2802040e0c45b433898d8db453d711d5376e0478f1",
+      "sha256Verified": true,
+      "installPath": "/home/ubuntu/projects/subwise/.local/ohos-clt/command-line-tools",
+      "installBytes": "6.5G"
+    },
+    "localRun": {
+      "status": "COMPILE_OK",
+      "errors": 0,
+      "warnings": 2,
+      "hapBytes": 50768,
+      "hapSha256": "068e821e6a54da824e36f2b6f6172b2f5aa74f06a3872d860c54870f788ecf42",
+      "signed": false,
+      "buildLog": "/home/ubuntu/.hermes/cache/scratch/subwise/harmony-evidence/build.log"
+    },
+    "ciRun": {
+      "runId": 41404486235,
+      "conclusion": "success",
+      "status": "COMPILE_OK",
+      "errors": 0,
+      "warnings": 2,
+      "hapBytes": 50768,
+      "hapSha256": "a8735de6130c5ac85db7564cf8b8a3905fc9a181b601fe203657838e1f6026b5",
+      "signed": false
+    },
+    "crossCheck": {
+      "byteCountEqual": true,
+      "wholePackageSha256Equal": false,
+      "wholePackageSha256Note": "整包 sha256 不同属预期：HAP 为 zip，条目携带构建时间戳",
+      "entryNamesEqual": true,
+      "perEntryContentDigestEqual": true,
+      "entryCount": 8,
+      "signatureEntryCount": 0,
+      "etsByteCode": {
+        "name": "ets/modules.abc",
+        "bytes": 34444,
+        "magic": "PANDA"
+      },
+      "bundleName": "dev.subwise.p03b",
+      "minApiVersion": "50000012 (API 12)",
+      "targetApiVersion": "50100018 (API 18)"
+    },
+    "warningsDetail": [
+      "entry 模块版本 0.0.1 不合 SemVer（hvigor 正则要求首段非 0）",
+      "No signingConfig found for product default"
+    ],
+    "still_NOT_RUN": [
+      "HAP 签名",
+      "设备安装/首次启动",
+      "AssetStoreKit 运行时行为",
+      "RDB 事务语义与跨端一致性",
+      "通知权限请求与送达",
+      "无凭据 HTTPS 请求",
+      "UI/安全区/大字体/明暗主题"
+    ]
+  },
+  "iosSimulatorRun": {
+    "ciRunId": 41400104979,
+    "run": {
+      "generatedAtUtc": "2026-11-02T06:41:03.090256+00:00",
+      "status": "RUN",
+      "error": null,
+      "bundleIdentifier": "dev.subwise.p03b",
+      "simulatorUdid": "1F0A9C4B-2DFC-444E-B162-696E5078A72B",
+      "simulatorName": "iPhone",
+      "simulatorRuntime": "Air com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+      "launchPid": 41594,
+      "screenshot": true,
+      "logLines": 177,
+      "note": "状态 RUN 表示 App 进程在 iOS 模拟器中真实启动；未含真机、UI 自动化或功能断言。"
+    },
+    "static": {
+      "bundleIdentifier": "dev.subwise.p03b",
+      "shortVersion": "0.0.1",
+      "bundleVersion": "1",
+      "minimumOSVersion": "15.1",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ],
+      "executableBytes": 13058208,
+      "appBundleKB": 50644,
+      "codesignVerifyError": null,
+      "machOBuildInfo": "platform IOSSIMULATOR; minos 15.1  sdk 26.5; platform IOSSIMULATOR  minos 15.1; sdk 26.5",
+      "embeddedFrameworks": [
+        "hermesvm.framework",
+        "React.framework",
+        "ReactNativeDependencies.framework"
+      ],
+      "xcodebuild": "Xcode 26.6 Build version 17F113"
+    },
+    "screenshotReviewed": true,
+    "screenshotObservation": "总览页 UI 完整渲染：标题、说明、SQLite 状态、三个操作按钮、底部四导航均可见；无报错、无空白页",
+    "screenshotCaveat": "页面处于空状态「本地暂无快照」——脚本只做启动不交互，iOS 端 SQLite 读写等原生能力未验证",
+    "still_NOT_RUN": [
+      "真机运行",
+      "UI 自动化",
+      "功能断言",
+      "生产签名"
+    ]
+  },
+  "androidApk": {
+    "ciRuns": {
+      "41068371207": {
+        "bytes": 37854296,
+        "sha256": "2026-10-30T14:13:16.3852187Z"
+      },
+      "41222127010": {
+        "bytes": 37854296,
+        "sha256": "2026-10-31T17:03:42.4163168Z"
+      },
+      "41400104979": {
+        "bytes": 37854296,
+        "sha256": "2026-11-02T06:35:21.4966033Z"
+      }
+    },
+    "byteCountStableAcrossRuns": true,
+    "sha256VariesAcrossRuns": true,
+    "localX86OnlyApkBytes": 27560663,
+    "localX86OnlyApkNote": "本机只编 x86_64（模拟器用），与 CI 的 arm64+armeabi 产物不同"
+  },
+  "localRegression": {
+    "webCheck": "pass",
+    "probeTsc": "exit 0",
+    "probeUnitTests": "8 passed / 0 failed"
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "medium",
+      "status": "FIXED_THIS_ROUND",
+      "title": "PLAN.md 状态表 APK 大小写错",
+      "detail": "写作 19.62 MB；三次 CI 日志均为 37854296 字节（36.1 MiB）。该数字在 66c3dc1 引入时即错，Windows 轮从未产出 APK，仓库此前无此表",
+      "fix": "改为「37,854,296 字节（36.1 MiB）」",
+      "file": "docs/mobile/PLAN.md"
+    },
+    {
+      "id": "F2",
+      "severity": "medium",
+      "status": "FIXED_THIS_ROUND",
+      "title": "PLAN.md iOS 行状态落后于正文与 CI 事实",
+      "detail": "表格写「模拟器/实跑 ❌ NOT_RUN（本轮刚加实跑校验）」，但同文档上方已写实跑通过，run 41400104979 亦产出 status=RUN 证据",
+      "fix": "改为「◐ 进程启动已验证（PID 41594，截图 UI 完整渲染）；功能断言 NOT_RUN」",
+      "file": "docs/mobile/PLAN.md"
+    },
+    {
+      "id": "F3",
+      "severity": "high",
+      "status": "FIXED_THIS_ROUND",
+      "title": "两个校验脚本恒 exit 0，证据缺失无显式信号",
+      "detail": "verify-ios-simulator.sh 8 处 exit 0、build-harmony-linux.sh 6 处 exit 0。脚本崩溃时 JSON 文件整个不存在，上传步骤 if-no-files-found: warn 也不报错，与「环境不具备」在 CI 上表现一致；continue-on-error: true 进一步掩盖退出码",
+      "fix": "已加 EXIT 兜底：两个脚本任何非正常结束都补写 status=ERROR 的 JSON，「证据文件不存在」不再是可能状态；新增 mobile/p03-b/scripts/check-evidence-status.py，两个 workflow 各加一步读 status 显式判定（非预期值 ::error:: 标红）。",
+      "residual": "SIGKILL / OOM kill 等硬终止不会被 shell trap 捕获 —— 这类情况仍需靠 CI 侧判定步骤发现「证据缺失」来兜",
+      "subIssueFoundDuringImplementation": {
+        "id": "F3b",
+        "title": "判定步骤自身会被跳过（if: always() 缺失）",
+        "detail": "验收时用崩溃注入发现：GitHub Actions 默认「上一步失败 → 后续步骤跳过」。鸿蒙编译步骤崩溃 → 上传与判定全被跳过 → 产物和刚写出的 ERROR 证据一起丢失，等于绕回原问题。iOS 侧靠 continue-on-error 兜住编译步骤，但上传步骤失败仍会跳过判定；if-no-files-found: error 会让上传失败终止 job。",
+        "fix": "鸿蒙 4 个步骤与 iOS 3 个步骤全部加 if: always()；两个 workflow 的 if-no-files-found: error 改为 warn；鸿蒙编译 run 改为 `bash ... || echo ::error::`；概要步骤读 JSON 改为容错。",
+        "verifiedBy": "YAML 解析断言每个步骤的 if / continue-on-error / if-no-files-found，并断言判定排在上传之后（12 项）"
+      }
+    },
+    {
+      "id": "F4",
+      "severity": "medium",
+      "status": "FIXED_THIS_ROUND",
+      "title": "产物 sha256 被误当作可复现性依据",
+      "detail": "APK 字节数跨 CI 稳定但 sha256 每次变；HAP 整包 sha256 每次变（zip 时间戳）",
+      "fix": "PLAN.md 新增「读 CI 结果的规矩」小节，明确按逐条目内容摘要比对",
+      "file": "docs/mobile/PLAN.md"
+    },
+    {
+      "id": "F5",
+      "severity": "low",
+      "status": "DOCUMENTED",
+      "title": "iOS 实跑证据强度被高估",
+      "detail": "截图处于空状态，脚本只启动不交互，iOS 端原生能力一行未验",
+      "fix": "PLAN.md iOS 行显式区分「进程启动已验证」与「功能断言 NOT_RUN」"
+    },
+    {
+      "id": "F6",
+      "severity": "low",
+      "status": "DOCUMENTED",
+      "title": "鸿蒙 compileSdkVersion 被抬高到 API 18",
+      "detail": "compileSdkVersion 5.0.0(12) → 5.1.0(18)（工具链只带 API 18）；compatibleSdkVersion 保持 5.0.0(12)，设备最低要求未变",
+      "fix": "HARMONY-TRACK.md 已如实标注，无需改动"
+    },
+    {
+      "id": "F7",
+      "severity": "info",
+      "status": "VERIFIED",
+      "title": "build-harmony.yml 从未在 CI 跑过",
+      "detail": "本轮首次手动 dispatch（run 41404486235）验证：全绿，产物与本机逐条目内容摘要一致"
+    }
+  ],
+  "notClaimed": [
+    "未声称 iOS 功能可用 —— 仅进程启动与静态信息已验证",
+    "未声称鸿蒙端可用 —— 仅 ArkTS 编译通过，签名/安装/运行/运行时行为全部未验",
+    "未声称真机、生产签名、P03-C 授权中的任何一项已获得",
+    "本轮未修改任何业务代码与已批准 UI；仅改 docs/mobile/PLAN.md"
+  ],
+  "preservedFiles": {
+    "docs/mobile/p03-b1/SUBWISE-P03-B1-REPORT.html": "725194b34fa91bc0e11c2bda2d44fa63a8fce721e35a1c7ea7f0b18723accd1b",
+    "docs/mobile/p03-b1/SUBWISE-P03-B1-LINUX-REPORT.html": "03cc233373a52fb1afce7224a968769cfaa96255121915901ac54e4dd7ccdc01",
+    "docs/mobile/p03-b1/P03-B1-LINUX-REPORT.md": "0fcaea0c86f92685e10b897abf35c976a641938eb30281d3209746863d6a2e00",
+    "docs/mobile/p03-b1/P03-B1-HARMONY-LINUX-REPORT.md": "2d6c4f9c428d71fdc846aa605c06235e8eefce900d40a62577e3e48236a768dd",
+    "docs/mobile/p03-b1/HARMONY-TRACK.md": "e3fc7cb7bc61d801a22da5f942ec97257d3118887c861aa07bc18f8a3cd9867a",
+    "docs/mobile/p03-b1/verify-report.mjs": "87374c2955bde4a6deaf36abd56f60434159148b328a5f9a254fc8153fd5da58",
+    "docs/mobile/p03-b1/verify-report-linux.mjs": "d3c9c620092e42b3979fb3d0b03e0109c39d2781474fd5a23b0ef9d21e57a4a8",
+    "docs/mobile/p03-b1/build-report.mjs": "6fad09ccd9d4266991212393aa855665b96e9138bcc4c21bea108cec694bee90",
+    "docs/mobile/p03-b1/build-report-linux.mjs": "a7bc96ed5bf47690a394dcf148a9dabe4b89b59740b64b2661084ad75ae34e17",
+    "docs/mobile/p03-b1/evidence/harmony-build.json": "51f15a19d2ecbe353c1514b8a30659e00b2ca061174da55b5ada76231c472318",
+    "docs/mobile/p03-b1/evidence/harmony-compile-linux-2026-10-30.json": "73a5b6f0268ec3a11940e5d4d725e09eeefe666ec2bc616fa1e9ca8bd8af850d"
+  },
+  "preservedFilesNote": "本轮只新增文件 + 改 docs/mobile/PLAN.md；以上旧轮次文件的 sha256 记录在此，verify-recheck-2026-11-02.mjs 逐个比对，确保未被改动",
+  "filesChangedThisRound": {
+    "modified": [
+      "docs/mobile/PLAN.md"
+    ],
+    "added": [
+      "docs/mobile/p03-b1/P03-B1-RECHECK-2026-11-02.md",
+      "docs/mobile/p03-b1/SUBWISE-P03-B1-RECHECK-2026-11-02.html",
+      "docs/mobile/p03-b1/build-recheck-report.py",
+      "docs/mobile/p03-b1/evidence/recheck-2026-11-02.json",
+      "docs/mobile/p03-b1/verify-recheck-2026-11-02.mjs"
+    ],
+    "businessCodeChanged": false
+  },
+  "findingsFixedThisRound": [
+    "F1",
+    "F2",
+    "F3",
+    "F4"
+  ],
+  "findingsStillOpen": [],
+  "codeChangesThisRound": {
+    "modified": [
+      {
+        "file": "mobile/p03-b/rn/scripts/verify-ios-simulator.sh",
+        "change": "加 EXIT 兜底（FINAL_RECORDED 标记 + on_exit），崩溃时补写 status=ERROR；把模拟器 shutdown 从独立 trap 并入 on_exit，保证只有一个 EXIT trap"
+      },
+      {
+        "file": "mobile/p03-b/harmony/scripts/build-harmony-linux.sh",
+        "change": "加 EXIT 兜底（EVIDENCE_WRITTEN 标记 + on_exit），崩溃时补写 status=ERROR"
+      },
+      {
+        "file": ".github/workflows/build-mobile.yml",
+        "change": "ios job 末尾加「判定 iOS 实跑结果」步骤，读 ios-run.json 的 status"
+      },
+      {
+        "file": ".github/workflows/build-harmony.yml",
+        "change": "harmony job 加「判定编译结果」步骤，读 harmony-build.json 的 status；全部关键步骤加 if: always()，if-no-files-found: error 改 warn"
+      }
+    ],
+    "added": [
+      {
+        "file": "mobile/p03-b/scripts/check-evidence-status.py",
+        "purpose": "读证据 JSON 的 status 并按期望值判定，缺失/坏JSON/无status 均 exit 1 标红"
+      }
+    ],
+    "businessLogicChanged": false,
+    "note": "改动只涉及证据产出与 CI 判定，不触碰业务代码、探针逻辑、已批准 UI"
+  },
+  "verificationSummary": {
+    "assertionsTotal": 165,
+    "assertionsFailed": 0,
+    "selfCheckCommand": "node docs/mobile/p03-b1/verify-recheck-2026-11-02.mjs"
+  },
+  "deviceTestPackage": {
+    "deliveredAtUtc": "2026-11-02T08:00:00+00:00",
+    "reason": "FA 有三台设备（Android 虚拟机 / Mac mini M4 / 荣耀鸿蒙真机）；服务器无 KVM 且内存不足，模拟器会被 OOM kill，故改为交付设备端脚本由 FA 在自己设备上跑，产出机器可读证据回来。",
+    "serverSideProbe": {
+      "attempted": true,
+      "emulatorBootSeconds": 400,
+      "sysBootCompletedNeverSet": true,
+      "note": "判据应是「shell 能响应」而不是等 boot 属性；本次 shell 与 logcat 均可用。",
+      "anrDialogBlockedUI": true,
+      "anrResolution": "关掉「System UI isn't responding」弹窗后，uiautomator dump 拿到完整 UI 层级，Subwise 界面渲染完全正常。",
+      "oomKilled": true,
+      "oomCause": "4 核 3.6GB 机器，可用内存仅 615MB，swap 1.6G/1.9G 打满，qemu 被 OOM killer 杀掉。",
+      "appRenderVerified": true,
+      "appRenderEvidence": [
+        "SQLite 已打开 · 已读取本地记录",
+        "本地暂无快照；点击写入模拟数据开始验证。",
+        "写入模拟数据并从 SQLite 读取"
+      ]
+    },
+    "scripts": {
+      "android": "mobile/p03-b/device-test/verify-android-device.sh",
+      "ios": "mobile/p03-b/device-test/verify-ios-device.sh",
+      "harmony": "mobile/p03-b/device-test/verify-harmony-device.sh",
+      "collector": "mobile/p03-b/device-test/collect-device-evidence.sh",
+      "guide": "docs/mobile/p03-b1/DEVICE-TEST-GUIDE.md"
+    },
+    "hardEvidencePerPlatform": {
+      "android": "点写入→UI 出现卡片；点重新读取→卡片仍在（落盘）；点模拟响应损坏→旧快照不丢；安全存储写读删；HTTPS 401；logcat 无 FATAL",
+      "ios": "直接读 app 沙盒 SQLite，确认 snapshots 表里 deepseek 与 minimax 两 provider 的行都在",
+      "harmony": "直接读 app 沙盒 RDB，确认 probe_rows 表里两个 provider 的行都在；hilog 无 FATAL"
+    },
+    "interactionProvenance": "iOS 无通用 UI dump，脚本按 idb → osascript → 人工 的优先级尝试，用了哪种写进 interaction.method；人工点击不记为脚本自动化。",
+    "collectorRules": "只有三端全 PASS 才输出 PASS；PARTIAL / NOT_RUN / ERROR / FAIL / 缺证据一律 INCOMPLETE。新增 PARTIAL 状态表示需人工介入。",
+    "remainingBlockers": [
+      "HarmonyOS 的 CI HAP 未签名，装不上真机 —— 需 FA 用 DevEco Studio 配签名重新构建",
+      "通知实际送达 / 安全存储文案 / HTTPS 状态码需 FA 肉眼确认（指南已逐端列出）",
+      "iOS 真机安装需 FA 自己的开发者证书，bundle id 建议改掉避免冲突"
+    ],
+    "status": "AWAITING_FA_RUN"
+  }
+}

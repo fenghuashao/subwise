@@ -21,13 +21,49 @@ Actions run（`41068371207`）后确认，iOS job 在 `macos-26` runner 上**已
 
 本轮未进入 P03-C / P04，**P03-C 仍需 FA 单独授权**。
 
-三端状态汇总（截至 2026-10-30）：
+三端状态汇总（截至 2026-11-02）：
 
 | 端 | 构建 | 模拟器/实跑 | 真机 | 生产签名 |
 |---|---|---|---|---|
-| Android | ✅ APK 19.62 MB | ✅ 模拟器实测通过 | NOT_RUN | ❌ debug 证书 |
-| iOS | ✅ 模拟器包 14.18 MB | ❌ NOT_RUN（本轮刚加实跑校验） | NOT_RUN | NOT_RUN |
-| HarmonyOS | ✅ 未签名 HAP 50 KB | NOT_RUN | NOT_RUN | NOT_RUN |
+| Android | ✅ APK 37,854,296 字节（36.1 MiB） | ✅ 模拟器实测通过 | **待本机设备验证**（脚本已备好） | ❌ debug 证书 |
+| iOS | ✅ 模拟器包（.app 49.46 MiB；artifact zip 14.18 MiB） | ◐ 进程启动已验证（PID 41594，截图 UI 完整渲染）；**功能断言 NOT_RUN** | **待 Mac mini M4 验证**（脚本已备好） | NOT_RUN |
+| HarmonyOS | ✅ 未签名 HAP 50 KB | NOT_RUN | **待荣耀鸿蒙真机验证**（脚本已备好，需自行签名） | NOT_RUN |
+
+### 三端真机验证路径（2026-11-02 新增）
+
+三端各有一个设备端脚本，跑在**你自己的设备**上，产出机器可读证据：
+
+| 端 | 脚本 | 驱动 | 关键断言 |
+|---|---|---|---|
+| Android | `mobile/p03-b/device-test/verify-android-device.sh` | adb | 启动 + SQLite 打开 + 点「写入」后卡片出现 + 点「重新读取」后卡片仍在（落盘）+ 点「模拟响应损坏」后旧快照不丢 + 安全存储 + HTTPS 401 + 无崩溃 |
+| iOS | `mobile/p03-b/device-test/verify-ios-device.sh` | xcrun simctl（+ idb/osascript 可选） | 启动 + **直接读 app 沙盒 SQLite**，确认 deepseek 与 minimax 两个 provider 的快照都真落盘 |
+| HarmonyOS | `mobile/p03-b/device-test/verify-harmony-device.sh` | hdc | 启动 + **读 app 沙盒 RDB**，确认 probe_rows 里两个 provider 的行都在 + hilog 无崩溃 |
+
+汇总器：`mobile/p03-b/device-test/collect-device-evidence.sh`。
+**只有三端全是 PASS 才输出 PASS** —— `PARTIAL` / `NOT_RUN` / `ERROR` / `FAIL` / 缺证据一律是 `INCOMPLETE`。
+
+操作步骤见 `docs/mobile/p03-b1/DEVICE-TEST-GUIDE.md`。
+
+> 注意：HarmonyOS 的 CI HAP 是**未签名**的，装不上真机 —— 必须用 DevEco Studio 配签名重新构建。
+> 通知送达等需要肉眼确认的项，脚本查不到，指南里列出了每端需要人工确认的具体条目。
+
+### 读 CI 结果的规矩（2026-11-02 补充）
+
+**CI 步骤绿色 ≠ 该项实测通过。** 两个校验脚本都把结果写进 JSON 后**恒 `exit 0`**，
+编译失败、证据缺失、环境不具备，在 Actions 页面上都表现为「成功」。判定必须读 JSON 的
+`status` 字段：
+
+| 产物 | 字段 | 通过值 | 失败/未做的值 |
+|---|---|---|---|
+| `harmony-build.json` | `status` | `COMPILE_OK` | `FAIL` / `NOT_RUN` |
+| `ios-run.json` | `status` | `RUN` | `NOT_RUN` / `ERROR` |
+
+**产物 sha256 不可用于「源码未变」证明**（APK 与 HAP 都会变）：
+
+- Android APK 字节数跨 CI 稳定为 37,854,296，但 sha256 每次不同（签名时间戳），
+  历史值示例：`0de5bf5f…c474d8`（run `41068371207`）、`243a64f2…69950`（run `41400104979`）。
+- HarmonyOS HAP 同理：run `41404486235` 为 `a8735de6…026b5`，本机同源码重跑为 `068e821e…ecf42`。
+  比对应改用**逐条目内容摘要**，本机与 CI 产物已验证逐条目一致。
 
 ## 产品边界
 只交付 iOS、Android、HarmonyOS 手机 App。默认鸿蒙指原生 HarmonyOS，最低系统版本待确认。无需账户即可本机使用。离线指管理与查询本地数据，不含离线运行 AI 模型。当前 HTML 仅为设计评审载体，不是最终网站或 App 交付。

@@ -201,6 +201,11 @@ jobs:
       - name: iOS 模拟器实跑校验
         # 动态校验（启动模拟器、安装、拉起进程）。软失败：环境不具备时写入
         # status=NOT_RUN 并附原因，不谎报通过，也不牵连已成功的构建。
+        #
+        # continue-on-error: true —— 脚本崩溃（exit≠0）时本步骤不算失败，
+        # 流程继续往下走，让「上传」与「判定」仍能执行：
+        # 崩溃时脚本会补写 status=ERROR 的 ios-run.json，判定步骤读到它就会标红。
+        # 如果没有这行，崩溃会导致后续步骤被跳过，ERROR 证据反而丢失。
         id: ios_run
         continue-on-error: true
         env:
@@ -212,8 +217,8 @@ jobs:
           chmod +x "$SCRIPT"
           APP=$(cat "$RUNNER_TEMP/app-path.txt")
           APP_PATH="$APP" EVIDENCE_DIR="$EVIDENCE_DIR" bash "$SCRIPT"
-          echo "--- ios-static.json ---"; cat "$EVIDENCE_DIR/ios-static.json"
-          echo "--- ios-run.json ---";    cat "$EVIDENCE_DIR/ios-run.json"
+          echo "--- ios-static.json ---"; cat "$EVIDENCE_DIR/ios-static.json" 2>/dev/null || echo "（无）"
+          echo "--- ios-run.json ---";    cat "$EVIDENCE_DIR/ios-run.json" 2>/dev/null || echo "（无）"
       - name: 上传 iOS 实跑证据
         if: always()
         uses: actions/upload-artifact@v4
@@ -223,8 +228,29 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - uses: actions/upload-artifact@v4
+        # if: always() —— 上一步失败也要上传已产出的材料；
+        # 没有这行的话，上传失败会直接跳过后面的判定步骤。
+        if: always()
         with:
           name: subwise-p03b-ios-simulator-app
           path: ${{ github.workspace }}/.local/p03-b1/ios-derived/Build/Products/Release-iphonesimulator/*.app
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
+      - name: 判定 iOS 实跑结果
+        # 校验脚本失败时也 exit 0（不牵连已成功的构建），所以上一步绿色不代表实跑通过。
+        # 这里读证据 JSON 的 status，把真实结论显式化：
+        #   RUN     → 通过
+        #   NOT_RUN → 环境不具备（标红，但不等于脚本坏了）
+        #   ERROR   → 校验脚本自身崩溃
+        # 文件不存在 → 标红并提示，这是最不该被静默放过的情况。
+        # 注意：本步在 iOS job 内，位于仓库根目录。
+        #
+        # 放在所有上传之后：即使判定不通过，产物与证据也已经留存，
+        # 不会因为这一步变红而丢掉可排查的材料。
+        # if: always() —— 上传 app 失败也要判定，否则真正的失败原因会被上传错误盖住。
+        if: always()
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/ios-evidence
+        run: |
+          python3 mobile/p03-b/scripts/check-evidence-status.py \
+            "$EVIDENCE_DIR/ios-run.json" RUN "iOS 模拟器实跑"

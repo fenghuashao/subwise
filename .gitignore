@@ -11,6 +11,10 @@ mobile/p03-b/rn/dist-web/
 .gradle/
 **/build/outputs/
 
+# Python bytecode
+__pycache__/
+*.pyc
+
 # Raw process logs & exit markers (keep structured *.json evidence)
 *.log
 *.exit

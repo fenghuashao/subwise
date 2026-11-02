@@ -17,6 +17,19 @@
 #   SKIP_DOWNLOAD  已有工具链时跳过下载，设为 1
 #
 # 依赖：unzip、java(JRE 17+)、curl、python3
+#
+# JSON 的 status 取值：
+#   COMPILE_OK  ArkTS 编译通过，产出 HAP
+#   FAIL        编译失败或产物缺失
+#   NOT_RUN     环境不具备，本次未执行（附原因）
+#   ERROR       脚本自身异常终止（崩溃 / 被 kill / 证据写入失败）
+#
+# 退出码：始终 0。结果以 JSON 的 status 为准，由调用方（CI）决定是否阻断。
+#
+# 实现注意（2026-11-02 新增）：EXIT 兜底保证「证据文件不存在」不再是可能状态。
+# 之前脚本崩溃时 harmony-build.json 整个不产出，而 CI 的上传步骤用
+# if-no-files-found: warn，于是「脚本崩了」与「环境不具备（JSON 写着 NOT_RUN）」
+# 在 CI 上表现完全一样。现在任何原因提前退出都会补写一份 status=ERROR 的记录。
 
 set -uo pipefail
 
@@ -61,7 +74,44 @@ d["diagnostics"] = {"errors": int(env("ERRS") or 0), "warnings": int(env("WARN")
 json.dump(d, open(sys.argv[1], "w"), indent=2, ensure_ascii=False)
 print(json.dumps(d, indent=2, ensure_ascii=False))
 PY
+  EVIDENCE_WRITTEN=1
 }
+
+# EXIT 兜底（2026-11-02 新增）
+#
+# 让「证据文件不存在」不再是可能状态：脚本崩溃时 harmony-build.json 整个不产出，
+# 而 CI 上传步骤用 if-no-files-found: warn，于是「脚本崩了」与「环境不具备」
+# 表现完全一样。任何非正常结束都补写一份 status=ERROR 的记录。
+#
+# 要点：
+#   * EVIDENCE_WRITTEN 标记区分「已由 write_evidence 写过」与「异常中止」。
+#   * trap 在任何可能失败的命令之前安装。
+#   * 兜底自身失败只打印警告，不改变退出码，也不掩盖原始失败。
+EVIDENCE_WRITTEN=0
+
+on_exit() {
+  local rc=$?
+  if [[ "$EVIDENCE_WRITTEN" -eq 0 ]]; then
+    echo "::error::脚本在未产出结论的情况下结束（exit=$rc），补写 status=ERROR 证据" >&2
+    STATUS="ERROR" REASON="脚本异常终止，未能完成编译核验（exit=$rc）。这是脚本自身失败，不等于环境不具备。" \
+      HAP="" ERRS="0" WARN="0" GLOG="$LOG" \
+      python3 - "$EVIDENCE_DIR/harmony-build.json" <<'PY' \
+      || echo "::error::兜底写入失败：harmony-build.json 仍不存在" >&2
+import json, os, sys, datetime
+env = os.environ.get
+json.dump({
+  "generatedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+  "status": env("STATUS"),
+  "reason": env("REASON") or None,
+  "buildLog": env("GLOG"),
+  "diagnostics": {"errors": int(env("ERRS") or 0), "warnings": int(env("WARN") or 0)},
+  "note": "status=ERROR 表示编译脚本自身崩溃或被中断；status=NOT_RUN 才表示环境不具备、本次未执行。",
+}, open(sys.argv[1], "w"), indent=2, ensure_ascii=False)
+PY
+  fi
+  return $rc
+}
+trap on_exit EXIT
 
 echo "== Subwise HarmonyOS 编译校验 =="
 echo "工程: $PROJ"

@@ -46,35 +46,65 @@ jobs:
           key: ohos-clt-${{ runner.os }}-${{ env.CLT_VERSION }}-${{ env.CLT_ZIP_SHA256 }}
 
       - name: 编译并产出证据
+        # if: always() —— 即使脚本崩溃（exit≠0）也继续往下走，
+        # 否则后续的「上传」与「判定」都会被跳过，产物和 ERROR 证据一起丢掉。
+        # 崩溃时脚本会补写一份 status=ERROR 的 harmony-build.json，
+        # 下面的判定步骤会读到它并标红 —— 这正是我们要的可见失败。
+        if: always()
         env:
           EVIDENCE_DIR: ${{ runner.temp }}/harmony-evidence
           SKIP_DOWNLOAD: ${{ steps.clt-cache.outputs.cache-hit == 'true' && '1' || '0' }}
         run: |
           set -uo pipefail
           cd mobile/p03-b/harmony
-          bash scripts/build-harmony-linux.sh
+          bash scripts/build-harmony-linux.sh || echo "::error::编译脚本异常退出（exit=$?）"
           echo "--- harmony-build.json ---"
-          cat "$EVIDENCE_DIR/harmony-build.json"
+          cat "$EVIDENCE_DIR/harmony-build.json" 2>/dev/null || echo "（无证据文件）"
 
       - name: 上传 HAP 与证据
+        # if: always() —— 上一步失败也要把已产出的材料留下来供排查。
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: subwise-p03b-harmony-unsigned-hap
           path: |
             mobile/p03-b/harmony/entry/build/default/outputs/default/entry-default-unsigned.hap
             ${{ runner.temp }}/harmony-evidence/harmony-build.json
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
+      - name: 判定编译结果
+        # build-harmony-linux.sh 失败时也 exit 0，把真实结果写进 JSON。
+        # 所以上一步绿色不代表编译通过 —— 这里读 status 显式判定：
+        #   COMPILE_OK → 通过
+        #   FAIL       → 编译失败
+        #   NOT_RUN    → 环境不具备（工具链缺失 / 校验不通过）
+        #   ERROR      → 脚本自身崩溃
+        # 文件不存在 → 标红并提示。
+        #
+        # 放在上传之后：即使判定不通过，产物与证据也已经留存，
+        # 不会因为这一步变红而丢掉可排查的材料。
+        # if: always() —— 上传失败也要判定，否则真正的失败原因会被上传错误盖住。
+        if: always()
+        env:
+          EVIDENCE_DIR: ${{ runner.temp }}/harmony-evidence
+        run: |
+          python3 mobile/p03-b/scripts/check-evidence-status.py \
+            "$EVIDENCE_DIR/harmony-build.json" COMPILE_OK "HarmonyOS ArkTS 编译"
+
       - name: 概要
+        if: always()
         run: |
           python3 - <<'PY'
-          import json, os
+          import json, os, sys
           p = os.path.join(os.environ.get('RUNNER_TEMP',''), 'harmony-evidence', 'harmony-build.json')
+          if not os.path.exists(p):
+              print('无证据文件：', p)
+              sys.exit(0)
           d = json.load(open(p))
           print('status   :', d['status'])
-          print('errors   :', d['diagnostics']['errors'])
-          print('warnings :', d['diagnostics']['warnings'])
+          print('errors   :', d.get('diagnostics',{}).get('errors'))
+          print('warnings :', d.get('diagnostics',{}).get('warnings'))
           if 'hap' in d:
               print('signed   :', d['hap']['signed'])
               print('sha256   :', d['hap']['sha256'])
