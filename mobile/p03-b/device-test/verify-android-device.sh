@@ -32,9 +32,17 @@
 #   PACKAGE        包名，默认 dev.subwise.p03b
 #   SKIP_INSTALL   设为 1 则不安装，直接用设备上已有的
 #
-# 退出码：始终 0。真实结果写进证据 JSON 的 status 字段。
+# 功能结论写进证据 JSON。证据写入失败时返回非零。
 
 set -uo pipefail
+
+# Git Bash 会把 adb 的设备端 /sdcard 路径转换为 Windows 本机路径。
+if [[ "${OSTYPE:-}" == msys* ]]; then
+  export PYTHONUTF8=1
+  if [[ "${MSYS2_ARG_CONV_EXCL:-}" != "*" ]]; then
+    export MSYS2_ARG_CONV_EXCL="/sdcard/${MSYS2_ARG_CONV_EXCL:+;$MSYS2_ARG_CONV_EXCL}"
+  fi
+fi
 
 APK="${APK_PATH:-}"
 OUT_DIR="${EVIDENCE_DIR:-}"
@@ -69,20 +77,22 @@ UI="$OUT_DIR/ui-hierarchy.xml"
 LOGCAT="$OUT_DIR/logcat.txt"
 
 FINAL_RECORDED=0
+DEVICE_KIND=unknown
 
 on_exit() {
   local rc=$?
   if [[ "$FINAL_RECORDED" -eq 0 ]]; then
     echo "::error::脚本在未产出结论的情况下结束（exit=$rc），补写 status=ERROR 证据" >&2
-    python3 - "$EVID" "$rc" <<'PY' || echo "::error::兜底写入失败：$EVID 仍不存在" >&2
+    python3 - "$EVID" "$rc" "$DEVICE_KIND" <<'PY' || echo "::error::兜底写入失败：$EVID" >&2
 import json, sys, datetime
 out, rc = sys.argv[1], sys.argv[2]
 json.dump({
   "generatedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
   "status": "ERROR",
+  "platform": "android", "deviceKind": sys.argv[3],
   "reason": "脚本异常终止，未能完成验证（exit=%s）。这是脚本自身失败，不等于环境不具备。" % rc,
   "note": "status=ERROR 表示验证脚本自身崩溃或被中断；status=NOT_RUN 才表示环境不具备、本次未执行。",
-}, open(out, "w"), indent=2, ensure_ascii=False)
+}, open(out, "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 PY
   fi
   return $rc
@@ -90,19 +100,22 @@ PY
 trap on_exit EXIT
 
 record() {
-  python3 - "$EVID" "$1" "$2" "$3" <<'PY'
-import json, sys, datetime
+  python3 - "$EVID" "$1" "$2" "$3" "$DEVICE_KIND" <<'PY' || exit 1
+import json, sys, datetime, os, tempfile
 out, status, reason, frag = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 d = {
     "generatedAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
     "status": status,
+    "platform": "android", "deviceKind": sys.argv[5],
     "reason": reason,
     "note": ("status=ERROR 表示验证脚本自身崩溃或被中断；"
              "status=NOT_RUN 才表示环境不具备、本次未执行；"
              "status=PARTIAL 表示只完成了一部分。"),
 }
 d.update(json.loads(frag))
-json.dump(d, open(out, "w"), indent=2, ensure_ascii=False)
+with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=os.path.dirname(out), delete=False) as tmp:
+    json.dump(d, tmp, indent=2, ensure_ascii=False)
+os.replace(tmp.name, out)
 print(json.dumps(d, indent=2, ensure_ascii=False))
 PY
   FINAL_RECORDED=1
@@ -117,13 +130,24 @@ if [[ -z "$ADB_BIN" || ! -x "$ADB_BIN" ]]; then
 fi
 echo "adb: $ADB_BIN"
 
-STATE=$("$ADB_BIN" get-state 2>/dev/null || true)
+STATE=$("$ADB_BIN" get-state 2>/dev/null | tr -d '\r' || true)
 if [[ "$STATE" != "device" ]]; then
   record "NOT_RUN" "设备不可用（adb state=${STATE:-none}）。请确认 USB 调试已开启、已在手机上确认授权。" \
     '{"checks":{"adbAvailable":true,"deviceConnected":false}}'
   exit 0
 fi
 echo "设备已连接"
+
+# 仅在 adb 有模拟器标识或明确报告 USB 传输时归类。无线连接可以完成功能验证。
+SERIAL=$("$ADB_BIN" get-serialno 2>/dev/null | tr -d '\r')
+QEMU=$("$ADB_BIN" shell getprop ro.kernel.qemu 2>/dev/null | tr -d '\r')
+BOOT_QEMU=$("$ADB_BIN" shell getprop ro.boot.qemu 2>/dev/null | tr -d '\r')
+DEVPATH=$("$ADB_BIN" get-devpath 2>/dev/null | tr -d '\r')
+if [[ "$SERIAL" == emulator-* || "$QEMU" == 1 || "$BOOT_QEMU" == 1 ]]; then
+  DEVICE_KIND=simulator
+elif [[ "$DEVPATH" == usb:* ]]; then
+  DEVICE_KIND=physical
+fi
 
 DEV_MODEL=$("$ADB_BIN" shell getprop ro.product.model 2>/dev/null | tr -d '\r')
 DEV_ANDROID=$("$ADB_BIN" shell getprop ro.build.version.release 2>/dev/null | tr -d '\r')
@@ -132,14 +156,9 @@ echo "设备: $DEV_MODEL / Android $DEV_ANDROID (API $DEV_SDK)"
 
 # ---------------------------------------------------------------- 安装
 INSTALLED_BY_SCRIPT=0
-if [[ "${SKIP_INSTALL:-0}" != "1" && -n "$APK" && -f "$APK" ]]; then
+if [[ "${SKIP_INSTALL:-0}" != "1" && -n "$APK" ]]; then
   echo "-- 安装 APK: $APK"
-  "$ADB_BIN" uninstall "$PKG" >/dev/null 2>&1 || true
-  PUSH_TMP="/data/local/tmp/subwise-p03b.apk"
-  "$ADB_BIN" push "$APK" "$PUSH_TMP" >/dev/null 2>&1
-  OUT=$("$ADB_BIN" shell pm install -r -t "$PUSH_TMP" 2>&1 | tr -d '\r')
-  echo "   $OUT"
-  if [[ "$OUT" == *"Success"* ]]; then
+  if OUT=$("$ADB_BIN" install -r -t "$APK" 2>&1) && [[ "$OUT" == *"Success"* ]]; then
     INSTALLED_BY_SCRIPT=1
   else
     record "FAIL" "APK 安装失败：$OUT" \
@@ -152,7 +171,6 @@ fi
 
 # ---------------------------------------------------------------- 启动
 echo "-- 启动应用"
-"$ADB_BIN" logcat -c >/dev/null 2>&1 || true
 "$ADB_BIN" shell am force-stop "$PKG" >/dev/null 2>&1 || true
 sleep 1
 "$ADB_BIN" shell am start -W -n "$ACTIVITY" >/dev/null 2>&1
@@ -168,9 +186,13 @@ echo "   PID=$PID"
 
 # ---------------------------------------------------------------- 工具函数
 dump_ui() {
-  # $1 = 输出 xml 路径；返回本应用可见文本（换行分隔）
-  timeout 40 "$ADB_BIN" shell uiautomator dump /sdcard/p03b-ui.xml >/dev/null 2>&1 || true
-  timeout 25 "$ADB_BIN" pull /sdcard/p03b-ui.xml "$1" >/dev/null 2>&1 || true
+  # 每次使用新的设备端文件名，避免失败的 dump 或 pull 留下上一阶段的 UI。
+  local remote="/sdcard/p03b-ui-$$-$RANDOM.xml"
+  : > "$1"
+  if timeout 40 "$ADB_BIN" shell uiautomator dump "$remote" >/dev/null 2>&1; then
+    timeout 25 "$ADB_BIN" pull "$remote" "$1" >/dev/null 2>&1 || : > "$1"
+  fi
+  "$ADB_BIN" shell rm -f "$remote" >/dev/null 2>&1 || true
 }
 
 ui_state() {
@@ -182,7 +204,7 @@ try:
     root = ET.parse(path).getroot()
 except Exception:
     print(json.dumps({"texts": [], "clickables": [], "nodeCount": 0}, ensure_ascii=False)); sys.exit(0)
-texts, clickables = [], []
+texts, clickables, swipe = [], [], []
 for n in root.iter("node"):
     if n.get("package") != pkg:
         continue
@@ -190,13 +212,20 @@ for n in root.iter("node"):
         v = (n.get(k) or "").strip()
         if v and v not in texts:
             texts.append(v)
+    bounds = list(map(int, re.findall(r"-?\d+", n.get("bounds") or "")))
+    if len(bounds) != 4:
+        continue
+    left, top, right, bottom = bounds
+    if left >= right or top >= bottom:
+        continue
+    cx = (left + right) // 2
+    if n.get("scrollable") == "true":
+        margin = (bottom - top) // 5
+        swipe = [cx, bottom - margin, cx, top + margin]
     if n.get("clickable") == "true":
-        m = re.findall(r"-?\d+", n.get("bounds") or "")
-        if len(m) == 4:
-            clickables.append({"text": (n.get("text") or "").strip(),
-                               "cx": (int(m[0]) + int(m[2])) // 2,
-                               "cy": (int(m[1]) + int(m[3])) // 2})
-print(json.dumps({"texts": texts, "clickables": clickables,
+        clickables.append({"text": (n.get("content-desc") or n.get("text") or "").strip(),
+                           "cx": cx, "cy": (top + bottom) // 2})
+print(json.dumps({"texts": texts, "clickables": clickables, "swipe": swipe,
                   "nodeCount": sum(1 for n in root.iter("node") if n.get("package") == pkg)},
                  ensure_ascii=False))
 PY
@@ -204,21 +233,31 @@ PY
 
 tap_text() {
   # $1 = 按钮文案关键词；找到就点，返回 0/1
-  local kw="$1" st
-  st=$(ui_state "$UI")
-  local coord
-  coord=$(printf '%s' "$st" | python3 -c "
+  local kw="$1" action x y x2 y2 i j
+  local -a reverse_swipe
+  for ((i=0; i<=6; i++)); do
+    read -r action x y x2 y2 < <(ui_state "$UI" | python3 -c "
 import json,sys
 d=json.load(sys.stdin)
 for c in d.get('clickables',[]):
-    if '$kw' in (c.get('text') or ''):
-        print(c['cx'], c['cy']); break
-" 2>/dev/null || true)
-  if [[ -z "$coord" ]]; then return 1; fi
-  echo "   点击「$kw」@ $coord"
-  # shellcheck disable=SC2086
-  timeout 25 "$ADB_BIN" shell input tap $coord >/dev/null 2>&1 || true
-  return 0
+    if sys.argv[1] in (c.get('text') or ''):
+        print('tap', c['cx'], c['cy']); break
+else:
+    if d.get('swipe'): print('swipe', *d['swipe'])
+" "$kw" | tr -d '\r')
+    if [[ "$action" == tap ]]; then
+      timeout 25 "$ADB_BIN" shell input tap "$x" "$y" >/dev/null 2>&1 || return 1
+      # 回到操作前视口以检查状态文案和数据卡片。
+      for ((j=0; j<i; j++)); do
+        "$ADB_BIN" shell input swipe "${reverse_swipe[@]}" 300 >/dev/null 2>&1 || return 1
+      done
+      return 0
+    fi
+    [[ "$action" == swipe && "$i" -lt 6 ]] || return 1
+    reverse_swipe=("$x2" "$y2" "$x" "$y")
+    "$ADB_BIN" shell input swipe "$x" "$y" "$x2" "$y2" 300 >/dev/null 2>&1 || return 1
+    dump_ui "$UI"
+  done
 }
 
 # ---------------------------------------------------------------- 初始状态
@@ -234,8 +273,7 @@ if tap_text "写入模拟数据"; then WRITE_CLICKED=1; sleep 5; else echo "   !
 dump_ui "$UI"
 UI_JSON=$(ui_state "$UI")
 AFTER_WRITE=$(printf '%s' "$UI_JSON" | python3 -c "import json,sys;print('\n'.join(json.load(sys.stdin).get('texts',[])))")
-"$ADB_BIN" shell screencap -p /sdcard/p03b.png >/dev/null 2>&1 || true
-"$ADB_BIN" pull /sdcard/p03b.png "$SHOT" >/dev/null 2>&1 || true
+"$ADB_BIN" exec-out screencap -p > "$SHOT" 2>/dev/null || : > "$SHOT"
 
 # ---------------------------------------------------------------- 交互 2：重新读取
 echo "-- 交互 2：重新读取本地 SQLite（验证落盘）"
@@ -255,17 +293,7 @@ AFTER_CORRUPT=$(printf '%s' "$UI_JSON" | python3 -c "import json,sys;print('\n'.
 
 # ---------------------------------------------------------------- 交互 4：我的页安全存储 + HTTPS + 通知
 echo "-- 交互 4：切到「我的」页"
-TAB_MY="0 0"
-MYCOORD=$(printf '%s' "$UI_JSON" | python3 -c "
-import json,sys
-d=json.load(sys.stdin)
-for c in d.get('clickables',[]):
-    if (c.get('text') or '')=='我的':
-        print(c['cx'], c['cy']); break
-" 2>/dev/null || true)
-if [[ -n "$MYCOORD" ]]; then
-  # shellcheck disable=SC2086
-  timeout 25 "$ADB_BIN" shell input tap $MYCOORD >/dev/null 2>&1 || true
+if tap_text "我的"; then
   sleep 3
 else
   echo "   !! 未找到「我的」标签"
@@ -294,15 +322,19 @@ AFTER_NOTIFY=$(printf '%s' "$UI_JSON" | python3 -c "import json,sys;print('\n'.j
 
 # ---------------------------------------------------------------- logcat
 echo "-- 收集 logcat"
-timeout 30 "$ADB_BIN" logcat -d -v brief > "$LOGCAT" 2>/dev/null || true
-timeout 25 "$ADB_BIN" logcat -d -b crash -v brief 2>/dev/null | head -120 >> "$LOGCAT" 2>/dev/null || true
+timeout 30 "$ADB_BIN" logcat -d --pid="$PID" -v brief > "$LOGCAT" 2>/dev/null || true
+timeout 25 "$ADB_BIN" logcat -d --pid="$PID" -b crash -v brief 2>/dev/null | head -120 >> "$LOGCAT" 2>/dev/null || true
 
 # ---------------------------------------------------------------- 断言
 echo "-- 功能断言"
-FRAG=$(python3 - "$INIT_TEXTS" "$AFTER_WRITE" "$AFTER_REREAD" "$AFTER_CORRUPT" "$AFTER_SECURE" "$AFTER_HTTPS" "$AFTER_NOTIFY" "$LOGCAT" "$SHOT" "$UI" <<'PY'
+FRAG=$(python3 - "$INIT_TEXTS" "$AFTER_WRITE" "$AFTER_REREAD" "$AFTER_CORRUPT" "$AFTER_SECURE" "$AFTER_HTTPS" "$AFTER_NOTIFY" "$LOGCAT" "$SHOT" \
+  "$WRITE_CLICKED" "$REREAD_CLICKED" "$CORRUPT_CLICKED" "$SECURE_CLICKED" "$HTTPS_CLICKED" "$NOTIFY_CLICKED" <<'PY'
 import json, os, sys
 
-(init, wrote, reread, corrupt, secure, https, notify, logcat, shot, ui) = sys.argv[1:11]
+(init, wrote, reread, corrupt, secure, https, notify, logcat, shot) = sys.argv[1:10]
+write_clicked, reread_clicked, corrupt_clicked, secure_clicked, https_clicked, notify_clicked = (
+    flag == "1" for flag in sys.argv[10:]
+)
 
 def read(p):
     try:
@@ -321,39 +353,41 @@ checks["sqliteNotFailed"] = "SQLite 打开失败" not in init
 checks["titleRendered"] = "Subwise · 总览" in init
 checks["tabsRendered"] = all(t in init for t in ("总览", "订阅", "用量", "我的"))
 checks["markedSynthetic"] = "模拟数据" in init
-checks["emptyStateBeforeWrite"] = "本地暂无快照" in init
 
 # ── 写 → 读回闭环
-checks["writeClicked"] = True
+checks["writeClicked"] = write_clicked
+checks["writeCompleted"] = "模拟适配器 → SQLite → UI 完成" in wrote
 checks["cardDeepSeekRendered"] = "DeepSeek" in wrote
 checks["cardMiniMaxRendered"] = "MiniMax" in wrote
 checks["balanceValueRendered"] = ("CNY" in wrote) or ("剩余" in wrote)
 checks["emptyStateGoneAfterWrite"] = "本地暂无快照" not in wrote
 
 # ── 落盘（重新读取后仍在）
-checks["rereadClicked"] = True
+checks["rereadClicked"] = reread_clicked
+checks["rereadCompleted"] = "已重新读取本地快照" in reread
 checks["dataPersistedAfterReread"] = ("DeepSeek" in reread) and ("MiniMax" in reread)
 
 # ── 异常路径不丢数据（模拟响应损坏后旧快照仍在）
-checks["corruptClicked"] = True
+checks["corruptClicked"] = corrupt_clicked
+checks["corruptResponseRejected"] = "验证失败 · 已保留最后成功记录" in corrupt
 checks["snapshotSurvivesCorrupt"] = ("DeepSeek" in corrupt) and ("MiniMax" in corrupt)
 
 # ── 安全存储（真机专有能力）
-checks["secureStorageClicked"] = True
+checks["secureStorageClicked"] = secure_clicked
 checks["secureStoragePassed"] = ("安全存储写 / 读 / 删通过" in secure) or ("写 / 读 / 删通过" in secure)
 checks["secureStorageNotFailed"] = "验证失败" not in secure
 
 # ── HTTPS 无凭据探针
-checks["httpsProbeClicked"] = True
+checks["httpsProbeClicked"] = https_clicked
 checks["httpsProbe401"] = "401" in https
 checks["httpsProbeUnauthenticated"] = "未认证" in https
 
 # ── 通知
-checks["notificationClicked"] = True
-checks["notificationResultRecorded"] = bool(after_notify.strip())
+checks["notificationClicked"] = notify_clicked
+checks["notificationScheduled"] = "调度 API 返回成功" in notify
 
 # ── 稳定性
-checks["noFatalException"] = "FATAL EXCEPTION" not in log
+checks["noFatalException"] = bool(log.strip()) and "FATAL EXCEPTION" not in log
 checks["screenshotTaken"] = shot_ok
 
 frag = {
@@ -377,7 +411,7 @@ frag["checksTotal"] = len(checks)
 frag["checksFailed"] = frag["checksTotal"] - frag["checksPassed"]
 print(json.dumps(frag, ensure_ascii=False))
 PY
-)
+) || exit 1
 
 echo "$FRAG" | head -c 600; echo
 

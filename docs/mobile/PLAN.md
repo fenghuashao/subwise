@@ -26,21 +26,22 @@ Actions run（`41068371207`）后确认，iOS job 在 `macos-26` runner 上**已
 | 端 | 构建 | 模拟器/实跑 | 真机 | 生产签名 |
 |---|---|---|---|---|
 | Android | ✅ APK 37,854,296 字节（36.1 MiB） | ✅ 模拟器实测通过 | **待本机设备验证**（脚本已备好） | ❌ debug 证书 |
-| iOS | ✅ 模拟器包（.app 49.46 MiB；artifact zip 14.18 MiB） | ◐ 进程启动已验证（PID 41594，截图 UI 完整渲染）；**功能断言 NOT_RUN** | **待 Mac mini M4 验证**（脚本已备好） | NOT_RUN |
+| iOS | ✅ 模拟器包（.app 49.46 MiB；artifact zip 14.18 MiB） | ◐ 进程启动已验证（PID 41594，截图 UI 完整渲染）；**功能断言 NOT_RUN** | 待连接 iPhone 并用开发签名的设备包验证 | NOT_RUN |
 | HarmonyOS | ✅ 未签名 HAP 50 KB | NOT_RUN | **待荣耀鸿蒙真机验证**（脚本已备好，需自行签名） | NOT_RUN |
 
-### 三端真机验证路径（2026-11-02 新增）
+### 三端设备验证路径（2026-11-05 更新）
 
 三端各有一个设备端脚本，跑在**你自己的设备**上，产出机器可读证据：
 
 | 端 | 脚本 | 驱动 | 关键断言 |
 |---|---|---|---|
 | Android | `mobile/p03-b/device-test/verify-android-device.sh` | adb | 启动 + SQLite 打开 + 点「写入」后卡片出现 + 点「重新读取」后卡片仍在（落盘）+ 点「模拟响应损坏」后旧快照不丢 + 安全存储 + HTTPS 401 + 无崩溃 |
-| iOS | `mobile/p03-b/device-test/verify-ios-device.sh` | xcrun simctl（+ idb/osascript 可选） | 启动 + **直接读 app 沙盒 SQLite**，确认 deepseek 与 minimax 两个 provider 的快照都真落盘 |
-| HarmonyOS | `mobile/p03-b/device-test/verify-harmony-device.sh` | hdc | 启动 + **读 app 沙盒 RDB**，确认 probe_rows 里两个 provider 的行都在 + hilog 无崩溃 |
+| iOS 模拟器 | `mobile/p03-b/device-test/verify-ios-device.sh --kind simulator` | xcrun simctl；可配 idb | 本轮在指定模拟器触发写入、从沙盒 SQLite 读回两个平台的快照 |
+| iPhone 真机 | 同脚本 `--kind physical --device <设备标识>` | xcrun devicectl | 开发签名包安装、启动成功记 PARTIAL；功能待验。结果单独保存 |
+| HarmonyOS | `mobile/p03-b/device-test/verify-harmony-device.sh` | hdc | 读取 RDB 基线，点击写入并核对两类新行，应用进程重启后再次读回 |
 
 汇总器：`mobile/p03-b/device-test/collect-device-evidence.sh`。
-**只有三端全是 PASS 才输出 PASS** —— `PARTIAL` / `NOT_RUN` / `ERROR` / `FAIL` / 缺证据一律是 `INCOMPLETE`。
+汇总固定检查 Android、iOS、HarmonyOS。`summary.overall` 表示三个平台各自的脚本功能断言均有通过证据；`summary.physicalOverall` 单独要求三个平台各有明确的真机通过证据。缺端、同目标重复提交或不合法证据会阻断总判定。设备分类、人工确认项和离线脚本回归命令见下方指南。
 
 操作步骤见 `docs/mobile/p03-b1/DEVICE-TEST-GUIDE.md`。
 
